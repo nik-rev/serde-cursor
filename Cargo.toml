@@ -1,6 +1,6 @@
 [package]
 name = "serde_cursor"
-version = "0.1.0"
+version = "0.0.0-reserved"
 edition = "2024"
 
 [dependencies]

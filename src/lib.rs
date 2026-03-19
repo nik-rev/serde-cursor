@@ -84,6 +84,12 @@ enum PathSegment {
     Array,
 }
 
+macro_rules! Cursor {
+    ($(.$field:ident)+ : $ty:ty) => {
+        $crate::Cursor<$ty, ()>
+    };
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -98,7 +104,7 @@ mod tests {
             }
         });
 
-        let value = serde_json::from_value::<Cursor<bool, ()>>(value)
+        let value = serde_json::from_value::<Cursor!(.a.b.c: bool)>(value)
             .unwrap()
             .value;
 
