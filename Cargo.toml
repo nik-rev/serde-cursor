@@ -1,6 +1,8 @@
 [package]
 name = "serde_cursor"
 version = "0.0.0-reserved"
+description = "serde cursor"
+license = "MIT OR Apache-2.0"
 edition = "2024"
 
 [dependencies]
