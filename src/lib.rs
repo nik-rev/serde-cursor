@@ -236,6 +236,64 @@
 //! let err = result.unwrap_err().to_string();
 //! assert_eq!(err, r#".author.id: invalid type: string "not-a-number", expected i32"#);
 //! ```
+//!
+//! # How does it work?
+//!
+//! The [`Cursor!`] macro is a "type-level" parser. It takes your jq-like query and transforms it into a nested, recursive type that implements [`serde::Deserialize`](serde_core::Deserialize).
+//!
+//! Consider this query, which gets the first dependency of every dependency in `Cargo.toml`:
+//!
+//! ```rust
+//! # /*
+//! Cursor!(package.*.dependencies.0: String)
+//! # */
+//! ```
+//!
+//! For this `Cargo.lock`, it would extract `["libc", "find-msvc-tools"]`:
+//!
+//! ```toml
+//! [[package]]
+//! name = "android_system_properties"
+//! dependencies = ["libc"]
+//!
+//! [[package]]
+//! name = "cc"
+//! dependencies = ["find-msvc-tools", "shlex"]
+//! ```
+//!
+//! That macro is expanded into a [Cursor](struct@Cursor) type, which implements [Deserialize](serde_core::Deserialize) and [Serialize](serde_core::Serialize):
+//!
+//! ```rust
+//! # /*
+//! Cursor<
+//!     String,
+//!     Cons<
+//!         Field<"package">,
+//!         Cons<
+//!             Wildcard,
+//!             Cons<
+//!                 Field<"dependencies">,
+//!                 Cons<Index<0>, Nil>,
+//!             >,
+//!         >,
+//!     >,
+//! >
+//! # */
+//! ```
+//!
+//! The above is essentially an equivalent to:
+//!
+//! ```rust
+//! vec!["package", *, "dependencies", 0]
+//! ```
+//!
+//! Except it exists entirely in the type system.
+//!
+//! Each time the [`Deserialize::deserialize()`](serde_core::Deserialize::deserialize) function is called, the first element of the type-level list is removed,
+//! and the rest of the list is passed to the [`Deserialize`](serde_core::Deserialize) trait, again.
+//!
+//! This happens until the list is exhausted, in which case we finally get to the type of the field - the `String` in the above example,
+//! and finally call [`Deserialize::deserialize()`](serde_core::Deserialize::deserialize) on that, to finish things off.
 
 mod de;
 mod path_segment;
