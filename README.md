@@ -51,6 +51,8 @@ let version: String = toml::from_str::<Cursor!(workspace.package.version)>(&data
 assert_eq!(version, "0.1");
 ```
 
+`Cursor!(workspace.package.version)` is the magic juice - this type-macro expands to a type that implements [`Deserialize`](https://docs.rs/serde_core/1.0.228/serde_core/de/trait.Deserialize.html).
+
 **Without `serde_cursor`**:
 
 *Pain and suffering…*

@@ -37,6 +37,8 @@
 //! # Ok(()) }
 //! ```
 //!
+//! `Cursor!(workspace.package.version)` is the magic juice - this type-macro expands to a type that implements [`Deserialize`](serde_core::Deserialize).
+//!
 //! **Without `serde_cursor`**:
 //!
 //! *Pain and suffering...*
