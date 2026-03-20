@@ -2,7 +2,7 @@ use serde_cursor::Cursor;
 use serde_json::json;
 
 #[serde_with::serde_as]
-#[derive(serde::Deserialize)]
+#[derive(serde::Serialize, serde::Deserialize)]
 struct CargoToml {
     #[serde_as(as = "Cursor!(workspace.package.version)")]
     version: String,
