@@ -101,15 +101,16 @@ where
 }
 
 #[cfg(feature = "serde_with")]
-impl<T, P> serde_with::SerializeAs<T> for Cursor<T, P> {
+impl<T, P> serde_with::SerializeAs<T> for Cursor<T, P>
+where
+    T: Serialize,
+    P: ToCursor<T>,
+{
     fn serialize_as<S>(source: &T, serializer: S) -> Result<S::Ok, S::Error>
     where
         S: serde_core::Serializer,
     {
-        serde_core::Serialize::serialize(
-            &serde_with::ser::SerializeAsWrap::<T, Cursor<T, P>>::new(source),
-            serializer,
-        )
+        P::serialize_nested(source, serializer)
     }
 }
 

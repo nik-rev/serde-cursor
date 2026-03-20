@@ -272,14 +272,15 @@ where
 }
 
 #[cfg(feature = "serde_with")]
-impl<'de, T, P> serde_with::DeserializeAs<'de, T> for Cursor<T, P> {
+impl<'de, T, P> serde_with::DeserializeAs<'de, T> for Cursor<T, P>
+where
+    T: Deserialize<'de>,
+    P: Path<'de, T>,
+{
     fn deserialize_as<D>(deserializer: D) -> Result<T, D::Error>
     where
         D: Deserializer<'de>,
     {
-        Ok(
-            serde_with::de::DeserializeAsWrap::<T, Cursor<T, P>>::deserialize(deserializer)?
-                .into_inner(),
-        )
+        P::navigate(deserializer)
     }
 }

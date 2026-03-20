@@ -180,7 +180,8 @@
 //!
 //! # `serde_with` integration
 //!
-//! If `feature = "serde_with"` is enabled, [`struct@Cursor`] will implement [`serde_with::DeserializeAs`], meaning you can use it with `#[serde_as]`:
+//! If `feature = "serde_with"` is enabled, [`Cursor`](struct@Cursor) will implement [`serde_with::DeserializeAs`] and [`serde_with::SerializeAs`],
+//! meaning you can use it with the `#[serde_as]` attribute:
 //!
 //! ```
 //! # use serde_with::serde_as;
@@ -190,9 +191,16 @@
 //! #[serde_as]
 //! #[derive(Serialize, Deserialize)]
 //! struct CargoToml {
-//!     #[serde_as(as = "Cursor!(workspace.package.version)")]
+//!     #[serde(rename = "workspace")]
+//!     #[serde_as(as = "Cursor!(package.version)")]
 //!     version: String,
 //! }
+//!
+//! # fn main() -> Result<(), Box<dyn std::error::Error>> {
+//! let toml: CargoToml = toml::from_str("workspace = { package = { version = '0.1.0' } }")?;
+//! assert_eq!(toml.version, "0.1.0");
+//! assert_eq!(serde_json::to_string(&toml)?, r#"{"workspace":{"package":{"version":"0.1.0"}}}"#);
+//! # Ok(()) }
 //! ```
 
 mod de;
