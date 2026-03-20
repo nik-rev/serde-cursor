@@ -1,0 +1,11 @@
+[package]
+name = "serde_cursor_impl"
+description = "implementation detail of the serde_cursor crate"
+version = "0.1.0"
+edition = "2024"
+
+[lib]
+proc-macro = true
+
+[dependencies]
+litrs = "1.0.0"

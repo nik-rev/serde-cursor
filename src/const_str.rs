@@ -2,8 +2,7 @@
 //
 // ref: https://github.com/dtolnay/monostate/blob/efb63b7ab6bfe73e7ccf20f71d17d3705cff9fcc/src/string.rs
 
-use core::slice;
-use std::mem::ManuallyDrop;
+use std::{marker::PhantomData, mem::ManuallyDrop};
 
 /// Allows effectively using `const S: &'static str` type parameter on stable rust.
 ///
@@ -30,30 +29,18 @@ where
     Str: StringBuffer,
 {
     const VALUE: &'static str = {
-        const {
-            // type-level length must match byte size of the buffer
-            assert!(LEN == size_of::<Str::Type>());
+        // force the data into a static memory location
+        struct StaticBuffer<T: StringBuffer, const N: usize>(PhantomData<T>);
+        impl<T: StringBuffer, const N: usize> StaticBuffer<T, N> {
+            const BYTES: [u8; N] = unsafe {
+                Cast::<T, N> {
+                    encoded: ManuallyDrop::new(T::BYTES),
+                }
+                .array
+            };
         }
 
-        // SAFETY:
-        //
-        // 1. `Cast` is a union that treats the generic as a raw byte array.
-        // 2. `StringBuffer` guarantees that implementors have no
-        //    padding, and an alignment of 1, making the transmute from `Str::BYTES` to `[u8; LEN]` sound.
-        // 3. `StringBuffer` guarantees that `StringBuffer::BYTES` (`Str::BYTES`) is
-        //    valid UTF-8, making the transmute from `&[u8; LEN]` to `&str` sound
-        unsafe {
-            str::from_utf8_unchecked(slice::from_raw_parts(
-                const {
-                    &Cast::<Str, LEN> {
-                        encoded: ManuallyDrop::new(Str::BYTES),
-                    }
-                    .array
-                }
-                .as_ptr(),
-                LEN,
-            ))
-        }
+        unsafe { std::str::from_utf8_unchecked(&StaticBuffer::<Str, LEN>::BYTES) }
     };
 }
 
@@ -153,7 +140,6 @@ unsafe impl StringBuffer for () {
 }
 
 #[repr(C)]
-#[expect(unused, reason = "used for repr")]
 pub struct Concat2<A, B>(A, B);
 
 // SAFETY:
@@ -171,7 +157,6 @@ where
 }
 
 #[repr(C)]
-#[expect(unused, reason = "used for repr")]
 pub struct Concat3<A, B, C>(A, B, C);
 
 // SAFETY:
@@ -190,7 +175,6 @@ where
 }
 
 #[repr(C)]
-#[expect(unused, reason = "used for repr")]
 pub struct Concat4<A, B, C, D>(A, B, C, D);
 
 // SAFETY:
@@ -210,7 +194,6 @@ where
 }
 
 #[repr(C)]
-#[expect(unused, reason = "used for repr")]
 pub struct Concat5<A, B, C, D, E>(A, B, C, D, E);
 
 // SAFETY:
@@ -231,7 +214,6 @@ where
 }
 
 #[repr(C)]
-#[expect(unused, reason = "used for repr")]
 pub struct Concat6<A, B, C, D, E, F>(A, B, C, D, E, F);
 
 // SAFETY:

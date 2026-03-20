@@ -16,9 +16,15 @@ checksum = "3f9eec918d3f24069decb9af1554cad7c880e2da24a9afd88aca000531ab82c1"
 
 [[package]]
 name = "itoa"
-version = "1.0.17"
+version = "1.0.18"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "92ecc6618181def0457392ccd0ee51198e065e016d1d527a7ac1b6dc7c1f09d2"
+checksum = "8f42a60cbdf9a97f5d2305f08a87dc4e09308d1276d28c869c684d7777685682"
+
+[[package]]
+name = "litrs"
+version = "1.0.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "11d3d7f243d5c5a8b9bb5d6dd2b1602c0cb0b9db1621bafc7ed66e35ff9fe092"
 
 [[package]]
 name = "logos"
@@ -175,13 +181,21 @@ dependencies = [
 
 [[package]]
 name = "serde_cursor"
-version = "0.0.0-reserved"
+version = "0.1.0"
 dependencies = [
  "monostate",
  "serde",
  "serde-query",
  "serde_core",
+ "serde_cursor_impl",
  "serde_json",
+]
+
+[[package]]
+name = "serde_cursor_impl"
+version = "0.1.0"
+dependencies = [
+ "litrs",
 ]
 
 [[package]]
