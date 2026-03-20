@@ -1,0 +1,5 @@
+error: unexpected token in path segment
+ --> tests/ui/unexpected_colon.rs:4:21
+  |
+4 | type X = Cursor!(a. : bool);
+  |                     ^

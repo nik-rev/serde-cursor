@@ -1,0 +1,5 @@
+error: unexpected token in path segment
+ --> tests/ui/invalid_token.rs:4:18
+  |
+4 | type X = Cursor!(@.field: i32);
+  |                  ^

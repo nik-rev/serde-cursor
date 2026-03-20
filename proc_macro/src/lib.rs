@@ -6,6 +6,8 @@ use proc_macro::Span;
 use proc_macro::TokenStream;
 use proc_macro::TokenTree;
 
+mod compile_error;
+use compile_error::CompileError;
 mod const_str;
 
 #[proc_macro]
@@ -33,7 +35,10 @@ pub fn Cursor(input: TokenStream) -> TokenStream {
         // Cursor!(a.0.c: bool)
         //         ^
         if !started {
-            parse_path_segment(&mut input, &mut path_segments);
+            match parse_path_segment(&mut input) {
+                Ok(seg) => path_segments.push(seg),
+                Err(e) => return e.into(),
+            }
 
             started = true;
 
@@ -44,7 +49,7 @@ pub fn Cursor(input: TokenStream) -> TokenStream {
             // Path ends at a colon
             //
             // Cursor!(a.b.c: bool)
-            //              ^
+            //               ^
             TokenTree::Punct(p) if p.as_char() == ':' => {
                 input.next();
 
@@ -57,7 +62,10 @@ pub fn Cursor(input: TokenStream) -> TokenStream {
             TokenTree::Punct(p) if p.as_char() == '.' => {
                 input.next();
 
-                parse_path_segment(&mut input, &mut path_segments);
+                match parse_path_segment(&mut input) {
+                    Ok(seg) => path_segments.push(seg),
+                    Err(e) => return e.into(),
+                }
             }
             _ => break,
         }
@@ -66,7 +74,7 @@ pub fn Cursor(input: TokenStream) -> TokenStream {
     // These tokens make up the actual Type.
     //
     // Cursor!(a.0.c: HashMap<&str, &str>)
-    //                ^^^^^^^^^^^^^^^^^^^
+    //                 ^^^^^^^^^^^^^^^^^^^
     let type_tokens: TokenStream = if input.peek().is_none() {
         TokenStream::from_iter([ident("_")])
     } else {
@@ -74,39 +82,33 @@ pub fn Cursor(input: TokenStream) -> TokenStream {
     };
 
     // Type path: `Cons<_, Cons<_, Nil>>`
-    let path = path_segments
+    let path_gen = path_segments
         .into_iter()
         .rev()
         .fold(path([ident("Nil")]), |p, segment| {
-            TokenStream::from_iter(
-                path([ident("Cons")])
-                    .into_iter()
-                    .chain([punct('<')])
-                    .chain(TokenStream::from_iter(
-                        segment.to_tokens().into_iter().chain([punct(',')]).chain(p),
-                    ))
-                    .chain([punct('>')]),
-            )
+            let mut ts = path([ident("Cons")]);
+            ts.extend([punct('<')]);
+            ts.extend(segment.to_tokens());
+            ts.extend([punct(',')]);
+            ts.extend(p);
+            ts.extend([punct('>')]);
+            ts
         });
 
-    let ts = TokenStream::from_iter(
-        [
-            punct(':'),
-            punct(':'),
-            ident("serde_cursor"),
-            punct(':'),
-            punct(':'),
-            ident("Cursor"),
-            punct('<'),
-        ]
-        .into_iter()
-        .chain(type_tokens)
-        .chain([punct(',')])
-        .chain(path)
-        .chain([punct('>')]),
-    );
+    let mut ts = TokenStream::from_iter([
+        punct(':'),
+        punct(':'),
+        ident("serde_cursor"),
+        punct(':'),
+        punct(':'),
+        ident("Cursor"),
+        punct('<'),
+    ]);
 
-    // panic!("{}", ts);
+    ts.extend(type_tokens);
+    ts.extend([punct(',')]);
+    ts.extend(path_gen);
+    ts.extend([punct('>')]);
 
     ts
 }
@@ -137,49 +139,66 @@ impl PathSegment {
 
 fn parse_path_segment(
     input: &mut std::iter::Peekable<proc_macro::token_stream::IntoIter>,
-    path_segments: &mut Vec<PathSegment>,
-) {
-    match input.peek().unwrap() {
+) -> Result<PathSegment, CompileError> {
+    let tt = input.peek().ok_or_else(|| {
+        CompileError::new(
+            Span::call_site(),
+            "expected path segment, found end of input",
+        )
+    })?;
+
+    match tt {
         // Identifier fields
         //
         // Cursor!(a.b.c: bool)
         //         ^
-        TokenTree::Ident(_) => {
-            let Some(TokenTree::Ident(field)) = input.next() else {
-                unreachable!()
-            };
-            path_segments.push(PathSegment::Field(field.to_string(), field.span()));
+        TokenTree::Ident(field) => {
+            let segment = PathSegment::Field(field.to_string(), field.span());
+            input.next();
+            Ok(segment)
         }
         TokenTree::Punct(p) if p.as_char() == '*' => {
             let span = p.span();
             let _ = input.next();
-            path_segments.push(PathSegment::Wildcard(span))
+            Ok(PathSegment::Wildcard(span))
         }
         TokenTree::Literal(lit) => {
+            let span = lit.span();
             match litrs::Literal::from(lit) {
                 // Integer index
                 //
                 // Cursor!(a.0.c: bool)
                 //           ^
                 litrs::Literal::Integer(index) => {
-                    path_segments.push(PathSegment::Index(
-                        index.value::<u128>().unwrap(),
-                        lit.span(),
-                    ));
+                    let val = index
+                        .value::<u128>()
+                        .ok_or_else(|| CompileError::new(span, "invalid integer index"))?;
                     input.next();
+                    Ok(PathSegment::Index(val, span))
                 }
                 // Integer index
                 //
                 // Cursor!(a."hello world".c: bool)
                 //           ^^^^^^^^^^^^^
                 litrs::Literal::String(field) => {
-                    path_segments.push(PathSegment::Field(field.value().to_string(), lit.span()));
+                    let val = field.value().to_string();
                     input.next();
+                    Ok(PathSegment::Field(val, span))
                 }
-                _ => panic!(),
-            };
+                _ => {
+                    Err(CompileError::new(
+                        span,
+                        "expected identifier, '*', integer, or string",
+                    ))
+                }
+            }
         }
-        _ => panic!(),
+        _ => {
+            Err(CompileError::new(
+                tt.span(),
+                "unexpected token in path segment",
+            ))
+        }
     }
 }
 

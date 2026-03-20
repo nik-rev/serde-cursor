@@ -33,6 +33,7 @@ serde = { version = "1.0.228", features = ["derive"] }
 serde-query = "0.2.0"
 serde_json = "1.0.149"
 toml = "1.0"
+trybuild = "1.0.116"
 
 [features]
 serde_with = ["dep:serde_with"]

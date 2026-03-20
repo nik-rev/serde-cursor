@@ -1,0 +1,10 @@
+error: path separator must be a double colon
+ --> tests/ui/double_colon.rs:4:20
+  |
+4 | type X = Cursor!(a::b: i32);
+  |          ----------^------- this macro call doesn't expand to a type
+  |
+help: use a double colon instead
+  |
+4 | type X = Cursor!(a::b: i32):;
+  |                            +

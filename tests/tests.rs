@@ -1,8 +1,5 @@
-use serde::Deserialize;
-use serde::Serialize;
 use serde_cursor::Cursor;
 use serde_json::json;
-use serde_with::serde_as;
 
 /// `C` satisfies any type returned by `Cursor!` macro
 #[track_caller]
@@ -23,7 +20,7 @@ where
 }
 
 #[test]
-fn test_deep_field_path() {
+fn deep_field_path() {
     let json = json!({
         "a": { "b": { "c": 100 } }
     });
@@ -32,7 +29,7 @@ fn test_deep_field_path() {
 }
 
 #[test]
-fn test_array_index_path() {
+fn array_index_path() {
     // indices create null-padding for preceding elements during serialization
     let json = json!({
         "arr": [null, null, "found me"]
@@ -42,7 +39,16 @@ fn test_array_index_path() {
 }
 
 #[test]
-fn test_wildcard_collection() {
+fn crab() {
+    let json = json!({
+        "🦀": "crab"
+    });
+
+    assert_roundtrip::<String, Cursor!("🦀")>(json, "crab".to_string());
+}
+
+#[test]
+fn wildcard_collection() {
     let json = json!([
         { "val": 10 },
         { "val": 20 }
@@ -52,7 +58,7 @@ fn test_wildcard_collection() {
 }
 
 #[test]
-fn test_mixed_nested_path() {
+fn mixed_nested_path() {
     let json = json!({
         "users": [
             null,
@@ -64,7 +70,7 @@ fn test_mixed_nested_path() {
 }
 
 #[test]
-fn test_nested_wildcards() {
+fn nested_wildcards() {
     let json = json!({
         "groups": [
             { "members": [{ "name": "A" }, { "name": "B" }] },
@@ -81,7 +87,7 @@ fn test_nested_wildcards() {
 }
 
 #[test]
-fn test_complex_wildcard_objects() {
+fn complex_wildcard_objects() {
     let json = json!({
         "data": [
             { "info": { "code": 1 } },
@@ -93,7 +99,11 @@ fn test_complex_wildcard_objects() {
 
 #[test]
 #[cfg(feature = "serde_with")]
-fn test_serde_as_integration_full_roundtrip() {
+fn serde_as_integration_full_roundtrip() {
+    use serde::Deserialize;
+    use serde::Serialize;
+    use serde_with::serde_as;
+
     #[serde_as]
     #[derive(Serialize, Deserialize, Debug, PartialEq)]
     struct FullProject {
@@ -120,7 +130,7 @@ fn test_serde_as_integration_full_roundtrip() {
 }
 
 #[test]
-fn test_borrowed_str_manual() {
+fn borrowed_str_manual() {
     let json_str = r#"{"project":{"name":"serde-cursor"}}"#;
     let expected = "serde-cursor";
 
@@ -135,7 +145,7 @@ fn test_borrowed_str_manual() {
 }
 
 #[test]
-fn test_wildcard_with_missing_fields() {
+fn wildcard_with_missing_fields() {
     // some objects have 'val', one has 'other', one is empty
     let json = json!([
         { "val": 1 },
@@ -155,7 +165,7 @@ fn test_wildcard_with_missing_fields() {
 }
 
 #[test]
-fn test_type_mismatch_error() {
+fn type_mismatch_error() {
     let json = json!({ "a": { "not_an_array": 42 } });
 
     // path expects an array at index 0, but finds a map
@@ -165,7 +175,7 @@ fn test_type_mismatch_error() {
 }
 
 #[test]
-fn test_matrix_wildcards() {
+fn matrix_wildcards() {
     let json = json!({
         "matrix": [
             [{"v": 1}, {"v": 2}],
@@ -184,7 +194,7 @@ fn test_matrix_wildcards() {
 
 #[test]
 #[allow(clippy::type_complexity)]
-fn test_empty_json_behaviors() {
+fn empty_json_behaviors() {
     // path exists but value is null
     let json = json!({"a": null});
     let cursor: Cursor!(a: Option<i32>) = serde_json::from_value(json).unwrap();

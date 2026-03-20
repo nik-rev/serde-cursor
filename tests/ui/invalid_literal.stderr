@@ -1,0 +1,5 @@
+error: expected identifier, '*', integer, or string
+ --> tests/ui/invalid_literal.rs:4:20
+  |
+4 | type X = Cursor!(a.3.14.c: i32);
+  |                    ^^^^

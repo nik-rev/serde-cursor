@@ -284,7 +284,9 @@
 //! The above is essentially an equivalent to:
 //!
 //! ```rust
+//! /*
 //! vec!["package", *, "dependencies", 0]
+//! */
 //! ```
 //!
 //! Except it exists entirely in the type system.
@@ -319,7 +321,7 @@ pub use ser::SerializeCursor;
 /// To access nested fields, use dotted field syntax:
 ///
 /// ```
-/// # mod fs { pub fn read_to_string(_: &str) -> Result<String, Box<dyn std::error::Error>> { Ok(String::from("workspace = { package = { version = '0' } }")) } }
+/// # mod fs { pub fn read_to_string(_: &str) -> Result<String, Box<dyn std::error::Error>> { Ok(String::from("workspace = { package = { version = '0.1' } }")) } }
 /// use serde_cursor::Cursor;
 ///
 /// # fn main() -> Result<(), Box<dyn std::error::Error>> {

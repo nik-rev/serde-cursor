@@ -11,14 +11,18 @@ use std::mem::ManuallyDrop;
 ///
 /// You need nightly Rust with `#![feature(adt_const_params)]` for this:
 ///
-/// ```ignore
+/// ```
+/// # /*
 /// const S: &'static str
+/// # */
 /// ```
 ///
 /// So while that's not stable yet, this can be used instead:
 ///
-/// ```ignore
+/// ```
+/// # /*
 /// S: ConstStr // then refer to the actual string via `S::VALUE`
+/// # */
 /// ```
 pub trait ConstStr {
     const VALUE: &'static str;

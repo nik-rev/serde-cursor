@@ -1,0 +1,13 @@
+error: unexpected token in path segment
+ --> tests/ui/empty.rs:7:18
+  |
+7 | type Y = Cursor!(: i32);
+  |                  ^
+
+error[E0121]: the placeholder `_` is not allowed within types on item signatures for type aliases
+ --> tests/ui/empty.rs:4:10
+  |
+4 | type X = Cursor!();
+  |          ^^^^^^^^^ not allowed in type signatures
+  |
+  = note: this error originates in the macro `Cursor` (in Nightly builds, run with -Z macro-backtrace for more info)
