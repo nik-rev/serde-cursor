@@ -4,7 +4,7 @@
 #![doc = concat!("![msrv](https://img.shields.io/badge/msrv-", env!("CARGO_PKG_RUST_VERSION"), "-blue?style=flat-square&logo=rust)")]
 //! [![github](https://img.shields.io/github/stars/nik-rev/serde-cursor)](https://github.com/nik-rev/serde-cursor)
 //!
-//! This crate has a macro that takes a jq-like query as an argument and returns a type implementing [`Deserialize`](serde_core::Deserialize).
+//! This crate has a macro that takes a [jq](https://jqlang.org/tutorial/)-like query as an argument and returns a type implementing [`Deserialize`](serde_core::Deserialize).
 //!
 //! ```toml
 #![doc = concat!(env!("CARGO_PKG_NAME"), " = ", "\"", env!("CARGO_PKG_VERSION_MAJOR"), ".", env!("CARGO_PKG_VERSION_MINOR"), "\"")]
@@ -37,6 +37,8 @@
 //! ```
 //!
 //! **Without `serde_cursor`**:
+//!
+//! *Pain and suffering...*
 //!
 //! ```
 //! # mod fs { pub fn read_to_string(_: &str) -> Result<String, Box<dyn std::error::Error>> { Ok(String::from("workspace = { package = { version = '0' } }")) } }
@@ -284,18 +286,19 @@
 //! The above is essentially an equivalent to:
 //!
 //! ```rust
-//! /*
+//! # /*
 //! vec!["package", *, "dependencies", 0]
-//! */
+//! # */
 //! ```
 //!
 //! Except it exists entirely in the type system.
 //!
-//! Each time the [`Deserialize::deserialize()`](serde_core::Deserialize::deserialize) function is called, the first element of the type-level list is removed,
+//! Each time the [`Deserialize::deserialize()`](https://docs.rs/serde/latest/serde/trait.Deserialize.html#tymethod.deserialize) function is called, the first element of the type-level list is removed,
 //! and the rest of the list is passed to the [`Deserialize`](serde_core::Deserialize) trait, again.
 //!
 //! This happens until the list is exhausted, in which case we finally get to the type of the field - the `String` in the above example,
-//! and finally call [`Deserialize::deserialize()`](serde_core::Deserialize::deserialize) on that, to finish things off.
+//! and finally call [`Deserialize::deserialize()`](https://docs.rs/serde/latest/serde/trait.Deserialize.html#tymethod.deserialize) on that, to finish things off.
+#![allow(rustdoc::invalid_rust_codeblocks)]
 
 mod de;
 mod path_segment;

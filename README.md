@@ -18,10 +18,10 @@ cargo-reedme: info-end -->
 [![crates.io](https://img.shields.io/crates/v/serde_cursor?style=flat-square&logo=rust)](https://crates.io/crates/serde_cursor)
 [![docs.rs](https://img.shields.io/docsrs/serde_cursor?style=flat-square&logo=docs.rs)](https://docs.rs/serde_cursor)
 ![license](https://img.shields.io/badge/license-Apache--2.0_OR_MIT-blue?style=flat-square)
-![msrv](https://img.shields.io/badge/msrv--blue?style=flat-square&logo=rust)
+![msrv](https://img.shields.io/badge/msrv-1.78-blue?style=flat-square&logo=rust)
 [![github](https://img.shields.io/github/stars/nik-rev/serde-cursor)](https://github.com/nik-rev/serde-cursor)
 
-This crate has a macro that takes a jq-like query as an argument and returns a type implementing [`Deserialize`](https://docs.rs/serde_core/latest/serde_core/de/trait.Deserialize.html).
+This crate has a macro that takes a [jq](https://jqlang.org/tutorial/)-like query as an argument and returns a type implementing [`Deserialize`](https://docs.rs/serde_core/1.0.228/serde_core/de/trait.Deserialize.html).
 
 ```toml
 serde_cursor = "0.1"
@@ -51,6 +51,8 @@ assert_eq!(version, "0.1");
 ```
 
 **Without `serde_cursor`**:
+
+*Pain and suffering…*
 
 ```rust
 use serde::Deserialize;
@@ -194,7 +196,7 @@ let data: Data = serde_json::from_str(&data)?;
 
 ## `serde_with` integration
 
-If `feature = "serde_with"` is enabled, [`Cursor`](https://docs.rs/serde_cursor/latest/serde_cursor/struct.Cursor.html) will implement [`serde_with::DeserializeAs`](https://docs.rs/serde_with/latest/serde_with/de/trait.DeserializeAs.html) and [`serde_with::SerializeAs`](https://docs.rs/serde_with/latest/serde_with/ser/trait.SerializeAs.html),
+If `feature = "serde_with"` is enabled, [`Cursor`](https://docs.rs/serde_cursor/latest/serde_cursor/struct.Cursor.html) will implement [`serde_with::DeserializeAs`](https://docs.rs/serde_with/3.18.0/serde_with/de/trait.DeserializeAs.html) and [`serde_with::SerializeAs`](https://docs.rs/serde_with/3.18.0/serde_with/ser/trait.SerializeAs.html),
 meaning you can use it with the `#[serde_as]` attribute:
 
 ```rust
@@ -229,7 +231,7 @@ assert_eq!(err, r#".author.id: invalid type: string "not-a-number", expected i32
 
 ## How does it work?
 
-The [`Cursor!`](https://docs.rs/serde_cursor_impl/latest/serde_cursor_impl/macro.Cursor.html) macro is a “type-level” parser. It takes your jq-like query and transforms it into a nested, recursive type that implements [`serde::Deserialize`](https://docs.rs/serde_core/latest/serde_core/de/trait.Deserialize.html).
+The [`Cursor!`](https://docs.rs/serde_cursor_impl/latest/serde_cursor_impl/macro.Cursor.html) macro is a “type-level” parser. It takes your jq-like query and transforms it into a nested, recursive type that implements [`serde::Deserialize`](https://docs.rs/serde_core/1.0.228/serde_core/de/trait.Deserialize.html).
 
 Consider this query, which gets the first dependency of every dependency in `Cargo.toml`:
 
@@ -249,7 +251,7 @@ name = "cc"
 dependencies = ["find-msvc-tools", "shlex"]
 ```
 
-That macro is expanded into a [Cursor](https://docs.rs/serde_cursor/latest/serde_cursor/struct.Cursor.html) type, which implements [Deserialize](https://docs.rs/serde_core/latest/serde_core/de/trait.Deserialize.html) and [Serialize](https://docs.rs/serde_core/latest/serde_core/ser/trait.Serialize.html):
+That macro is expanded into a [Cursor](https://docs.rs/serde_cursor/latest/serde_cursor/struct.Cursor.html) type, which implements [Deserialize](https://docs.rs/serde_core/1.0.228/serde_core/de/trait.Deserialize.html) and [Serialize](https://docs.rs/serde_core/1.0.228/serde_core/ser/trait.Serialize.html):
 
 ```rust
 Cursor<
@@ -275,10 +277,10 @@ vec!["package", *, "dependencies", 0]
 
 Except it exists entirely in the type system.
 
-Each time the [`Deserialize::deserialize()`](serde_core::Deserialize::deserialize) function is called, the first element of the type-level list is removed,
-and the rest of the list is passed to the [`Deserialize`](https://docs.rs/serde_core/latest/serde_core/de/trait.Deserialize.html) trait, again.
+Each time the [`Deserialize::deserialize()`](https://docs.rs/serde/latest/serde/trait.Deserialize.html#tymethod.deserialize) function is called, the first element of the type-level list is removed,
+and the rest of the list is passed to the [`Deserialize`](https://docs.rs/serde_core/1.0.228/serde_core/de/trait.Deserialize.html) trait, again.
 
 This happens until the list is exhausted, in which case we finally get to the type of the field - the `String` in the above example,
-and finally call [`Deserialize::deserialize()`](serde_core::Deserialize::deserialize) on that, to finish things off.
+and finally call [`Deserialize::deserialize()`](https://docs.rs/serde/latest/serde/trait.Deserialize.html#tymethod.deserialize) on that, to finish things off.
 
 <!-- cargo-reedme: end -->

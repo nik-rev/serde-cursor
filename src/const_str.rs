@@ -57,6 +57,8 @@ union Cast<T: StringBuffer, const N: usize> {
     array: [u8; N],
 }
 
+/// Represents an arbitrary sequence of UTF-8 encoded bytes, known at compile-time.
+///
 /// # Safety
 ///
 /// - `Type`: contains no padding bytes and has an alignment of 1.
