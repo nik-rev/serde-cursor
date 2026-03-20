@@ -87,7 +87,7 @@
 //!     .collect::<Vec<_>>();
 //! ```
 //!
-//! # `serde_cursor` vs `serde_query`
+//! # `serde_cursor` vs [`serde_query`]
 //!
 //! `serde_query` is significantly more verbose.
 //!
@@ -101,7 +101,7 @@
 //!
 //! let data = fs::read_to_string("data.json")?;
 //!
-//! let authors: Vec<String> = serde_json::from_str::<Query!(commits.*.author)>(&data)?.0;
+//! let authors: Vec<String> = serde_json::from_str::<Cursor!(commits.*.author)>(&data)?.0;
 //! ```
 //!
 //! `serde_query`:
@@ -158,6 +158,23 @@
 //!
 //! let data: Data = serde_json::from_str(&data)?;
 //! ```
+//!
+//! # `serde_with` integration
+//!
+//! If `feature = "serde_with"` is enabled, [`struct@Cursor`] will implement [`serde_with::DeserializeAs`], meaning you can use it with `#[serde_as]`:
+//!
+//! ```
+//! # use serde_as::serde_as;
+//! use serde::{Serialize, Deserialize};
+//! use serde_cursor::Cursor;
+//!
+//! #[serde_as]
+//! #[derive(Serialize, Deserialize)]
+//! struct CargoToml {
+//!     #[serde_as(as = "Cursor!(workspace.package.version)")]
+//!     version: String,
+//! }
+//! ```
 
 use core::fmt;
 use core::marker::PhantomData;
@@ -165,15 +182,12 @@ use serde_core::de::{
     Deserialize, DeserializeSeed, Deserializer, IgnoredAny, MapAccess, SeqAccess, Visitor,
 };
 
-/// The [`Cursor!`] macro
+/// The [`Cursor!`] macro.
 #[doc(inline)]
 pub use serde_cursor_impl::Cursor;
 
-#[doc(hidden)]
-pub struct Cursor<T, P> {
-    pub value: T,
-    _path: PhantomData<P>,
-}
+/// Type returned by the [`Cursor!`] macro.
+pub struct Cursor<T, P>(pub T, #[doc(hidden)] PhantomData<P>);
 
 impl<'de, T, P> Deserialize<'de> for Cursor<T, P>
 where
@@ -185,10 +199,7 @@ where
         D: Deserializer<'de>,
     {
         let value = P::navigate(deserializer)?;
-        Ok(Self {
-            value,
-            _path: PhantomData,
-        })
+        Ok(Self(value, PhantomData))
     }
 }
 

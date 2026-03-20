@@ -32,7 +32,7 @@ fn lol() {
 
     let x = serde_json::from_value::<Cursor!(contentJsons.anchors.*.name: Vec<String>)>(lol)
         .unwrap()
-        .value;
+        .0;
 
     // let x = serde_json::from_value::<Cursor!(a."hello world".c.2: bool)>(value)
     //     .unwrap()

@@ -100,7 +100,7 @@ let packages = toml::from_str::<CargoLock>(&file)?
     .collect::<Vec<_>>();
 ```
 
-## `serde_cursor` vs `serde_query`
+## `serde_cursor` vs [`serde_query`]
 
 `serde_query` is significantly more verbose.
 
@@ -113,7 +113,7 @@ use serde_cursor::Cursor;
 
 let data = fs::read_to_string("data.json")?;
 
-let authors: Vec<String> = serde_json::from_str::<Query!(commits.*.author)>(&data)?.0;
+let authors: Vec<String> = serde_json::from_str::<Cursor!(commits.*.author)>(&data)?.0;
 ```
 
 `serde_query`:
@@ -168,6 +168,22 @@ struct Data {
 let data = fs::read_to_string("data.json")?;
 
 let data: Data = serde_json::from_str(&data)?;
+```
+
+## `serde_with` integration
+
+If `feature = "serde_with"` is enabled, [`struct@Cursor`](https://docs.rs/serde_cursor/latest/serde_cursor/struct.Cursor.html) will implement [`serde_with::DeserializeAs`](https://docs.rs/serde_with/3.18.0/serde_with/de/trait.DeserializeAs.html), meaning you can use it with `#[serde_as]`:
+
+```rust
+use serde::{Serialize, Deserialize};
+use serde_cursor::Cursor;
+
+#[serde_as]
+#[derive(Serialize, Deserialize)]
+struct CargoToml {
+    #[serde_as(as = "Cursor!(workspace.package.version)")]
+    version: String,
+}
 ```
 
 <!-- cargo-reedme: end -->
