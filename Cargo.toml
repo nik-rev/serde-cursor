@@ -11,7 +11,7 @@ license.workspace = true
 all-features = true
 
 [dependencies]
-serde_cursor_impl = { path = "proc_macro" }
+serde_cursor_impl = { version = "0.1", path = "proc_macro" }
 
 serde_core = "1.0.228"
 

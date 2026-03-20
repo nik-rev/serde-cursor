@@ -1,3 +1,5 @@
+//! This crate is an implementation detail of the `serde_cursor` crate.
+
 use proc_macro::Ident;
 use proc_macro::Literal;
 use proc_macro::Punct;
