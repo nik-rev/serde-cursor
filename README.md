@@ -21,7 +21,8 @@ cargo-reedme: info-end -->
 ![msrv](https://img.shields.io/badge/msrv-1.78-blue?style=flat-square&logo=rust)
 [![github](https://img.shields.io/github/stars/nik-rev/serde-cursor)](https://github.com/nik-rev/serde-cursor)
 
-This crate has a macro that takes a [jq](https://jqlang.org/tutorial/)-like query as an argument and returns a type implementing [`Deserialize`](https://docs.rs/serde_core/1.0.228/serde_core/de/trait.Deserialize.html).
+This crate allows you to declaratively specify how to fetch the desired parts of a serde-compatible data format
+efficiently, without loading it into memory, using a [jq](https://jqlang.org/tutorial/)-like language.
 
 ```toml
 serde_cursor = "0.1"
