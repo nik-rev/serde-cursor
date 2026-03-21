@@ -17,64 +17,38 @@ use path::Path;
 
 #[proc_macro]
 #[allow(nonstandard_style)]
+pub fn CursorPath(input: TokenStream) -> TokenStream {
+    let mut input = input.into_iter().peekable();
+
+    let cursor_path_segments = match parse_path_segments(&mut input, '+') {
+        Ok(value) => value,
+        Err(compile_error) => return compile_error,
+    };
+
+    let ident = match path::ident(&mut input) {
+        Some(ident) => ident,
+        None => {
+            return CompileError::new(Span::call_site(), "expected identifier at the end").into()
+        }
+    };
+
+    // Cursor path: `CursorPath<_, CursorPath<_, T>>`
+    build_path(cursor_path_segments, ident)
+}
+
+#[proc_macro]
+#[allow(nonstandard_style)]
 pub fn Cursor(input: TokenStream) -> TokenStream {
     let mut input = input.into_iter().peekable();
 
-    // every cursor path segment individually
+    // These tokens make up the actual Type.
     //
-    // Cursor!(a.0.c: bool)
-    //         ^ ^ ^
-    let mut cursor_path_segments = Vec::new();
-
-    // this is needed to know if we should expect a "." before
-    // the first path segment, or not
-    let mut started = false;
-
-    // Parse path segments
-    //
-    // Cursor!(a.0.c: bool)
+    // Cursor!(a.0.c: HashMap<&str, &str>)
     //         ^^^^^
-    while let Some(tt) = input.peek() {
-        // the "." is not required for the first path
-        //
-        // Cursor!(a.0.c: bool)
-        //         ^
-        if !started {
-            match parse_path_segment(&mut input) {
-                Ok(seg) => cursor_path_segments.push(seg),
-                Err(e) => return e.into(),
-            }
-
-            started = true;
-
-            continue;
-        }
-
-        match tt {
-            // Path ends at a colon
-            //
-            // Cursor!(a.b.c: bool)
-            //               ^
-            TokenTree::Punct(p) if p.as_char() == ':' => {
-                input.next();
-
-                break;
-            }
-            // A single path segment
-            //
-            // Cursor!(a.0.c: bool)
-            //          ^^
-            TokenTree::Punct(p) if p.as_char() == '.' => {
-                input.next();
-
-                match parse_path_segment(&mut input) {
-                    Ok(seg) => cursor_path_segments.push(seg),
-                    Err(e) => return e.into(),
-                }
-            }
-            _ => break,
-        }
-    }
+    let cursor_path_segments = match parse_path_segments(&mut input, ':') {
+        Ok(value) => value,
+        Err(compile_error) => return compile_error,
+    };
 
     // These tokens make up the actual Type.
     //
@@ -87,9 +61,34 @@ pub fn Cursor(input: TokenStream) -> TokenStream {
     };
 
     // Cursor path: `CursorPath<_, CursorPath<_, CursorPathEnd>>`
-    let cursor_path = cursor_path_segments.into_iter().rev().fold(
-        path([ident("CursorPathEnd")]),
-        |p, segment| {
+    let cursor_path = build_path(
+        cursor_path_segments,
+        Ident::new("CursorPathEnd", Span::call_site()),
+    );
+
+    let mut ts = TokenStream::from_iter([
+        punct(':'),
+        punct(':'),
+        ident("serde_cursor"),
+        punct(':'),
+        punct(':'),
+        ident("Cursor"),
+        punct('<'),
+    ]);
+
+    ts.extend(type_tokens);
+    ts.extend([punct(',')]);
+    ts.extend(cursor_path);
+    ts.extend([punct('>')]);
+
+    ts
+}
+
+fn build_path(cursor_path_segments: Vec<PathSegment>, end: Ident) -> TokenStream {
+    cursor_path_segments
+        .into_iter()
+        .rev()
+        .fold(path([TokenTree::Ident(end)]), |p, segment| {
             let segment = match segment {
                 PathSegment::Interpolated { path, dollar: _ } => {
                     // Interpolated<P>
@@ -130,28 +129,61 @@ pub fn Cursor(input: TokenStream) -> TokenStream {
             ts.extend(p);
             ts.extend([punct('>')]);
             ts
-        },
-    );
+        })
+}
 
-    let mut ts = TokenStream::from_iter([
-        punct(':'),
-        punct(':'),
-        ident("serde_cursor"),
-        punct(':'),
-        punct(':'),
-        ident("Cursor"),
-        punct('<'),
-    ]);
+fn parse_path_segments(
+    input: &mut std::iter::Peekable<proc_macro::token_stream::IntoIter>,
+    end_token: char,
+) -> Result<Vec<PathSegment>, TokenStream> {
+    let mut cursor_path_segments = Vec::new();
+    let mut started = false;
+    while let Some(tt) = input.peek() {
+        // the "." is not required for the first path
+        //
+        // Cursor!(a.0.c: bool)
+        //         ^
+        if !started {
+            match parse_path_segment(input) {
+                Ok(seg) => cursor_path_segments.push(seg),
+                Err(e) => return Err(e.into()),
+            }
 
-    ts.extend(type_tokens);
-    ts.extend([punct(',')]);
-    ts.extend(cursor_path);
-    ts.extend([punct('>')]);
+            started = true;
 
-    ts
+            continue;
+        }
+
+        match tt {
+            // Path ends at a colon
+            //
+            // Cursor!(a.b.c: bool)
+            //               ^
+            TokenTree::Punct(p) if p.as_char() == end_token => {
+                input.next();
+
+                break;
+            }
+            // A single path segment
+            //
+            // Cursor!(a.0.c: bool)
+            //          ^^
+            TokenTree::Punct(p) if p.as_char() == '.' => {
+                input.next();
+
+                match parse_path_segment(input) {
+                    Ok(seg) => cursor_path_segments.push(seg),
+                    Err(e) => return Err(e.into()),
+                }
+            }
+            _ => break,
+        }
+    }
+    Ok(cursor_path_segments)
 }
 
 /// Represents a single segment of a path.
+#[derive(Debug)]
 enum PathSegment {
     /// The Wildcard, `*`.
     ///
