@@ -351,8 +351,9 @@ where
 
 impl<'de, P, C> Visitor<'de> for WildcardVisitor<P, C>
 where
-    C: Sequence<Item: Deserialize<'de>>,
+    C: Sequence,
     P: DeserializePath<'de, C::Item>,
+    C::Item: Deserialize<'de>,
 {
     type Value = C;
 
