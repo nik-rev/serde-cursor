@@ -33,7 +33,10 @@ pub fn CursorPath(input: TokenStream) -> TokenStream {
     };
 
     // Cursor path: `CursorPath<_, CursorPath<_, T>>`
-    build_path(cursor_path_segments, ident)
+    build_path(
+        cursor_path_segments,
+        TokenStream::from_iter([TokenTree::Ident(ident)]),
+    )
 }
 
 #[proc_macro]
@@ -63,7 +66,10 @@ pub fn Cursor(input: TokenStream) -> TokenStream {
     // Cursor path: `CursorPath<_, CursorPath<_, CursorPathEnd>>`
     let cursor_path = build_path(
         cursor_path_segments,
-        Ident::new("CursorPathEnd", Span::call_site()),
+        TokenStream::from_iter([path([TokenTree::Ident(Ident::new(
+            "CursorPathEnd",
+            Span::call_site(),
+        ))])]),
     );
 
     let mut ts = TokenStream::from_iter([
@@ -84,11 +90,11 @@ pub fn Cursor(input: TokenStream) -> TokenStream {
     ts
 }
 
-fn build_path(cursor_path_segments: Vec<PathSegment>, end: Ident) -> TokenStream {
+fn build_path(cursor_path_segments: Vec<PathSegment>, end: TokenStream) -> TokenStream {
     cursor_path_segments
         .into_iter()
         .rev()
-        .fold(path([TokenTree::Ident(end)]), |p, segment| {
+        .fold(end, |p, segment| {
             let segment = match segment {
                 PathSegment::Interpolated { path, dollar: _ } => {
                     // Interpolated<P>

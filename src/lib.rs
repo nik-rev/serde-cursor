@@ -440,6 +440,7 @@ pub use ser::SerializeCursor;
 /// See the [crate-level](crate) documentation for more.
 #[doc(inline)]
 pub use serde_cursor_impl::Cursor;
+pub use serde_cursor_impl::CursorPath;
 
 /// Type returned by the [`Cursor!`] macro.
 pub struct Cursor<T, P>(pub T, #[doc(hidden)] pub PhantomData<P>);

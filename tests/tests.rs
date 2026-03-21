@@ -165,66 +165,66 @@ fn wildcard_with_missing_fields() {
         {}
     ]);
 
-    type Foo<T> = ::serde_cursor::CursorPath<
-        ::serde_cursor::FieldName<
-            (
-                ::serde_cursor::StrLen<7>,
-                (
-                    ::serde_cursor::C1<'p'>,
-                    ::serde_cursor::C1<'a'>,
-                    ::serde_cursor::C1<'c'>,
-                    ::serde_cursor::C1<'k'>,
-                    ::serde_cursor::C1<'a'>,
-                    (::serde_cursor::C1<'g'>, ::serde_cursor::C1<'e'>),
-                ),
-            ),
-            {
-                [""];
-                false
-            },
-        >,
-        T,
-    >;
+    // type Foo<T> = ::serde_cursor::CursorPath<
+    //     ::serde_cursor::FieldName<
+    //         (
+    //             ::serde_cursor::StrLen<7>,
+    //             (
+    //                 ::serde_cursor::C1<'p'>,
+    //                 ::serde_cursor::C1<'a'>,
+    //                 ::serde_cursor::C1<'c'>,
+    //                 ::serde_cursor::C1<'k'>,
+    //                 ::serde_cursor::C1<'a'>,
+    //                 (::serde_cursor::C1<'g'>, ::serde_cursor::C1<'e'>),
+    //             ),
+    //         ),
+    //         {
+    //             [""];
+    //             false
+    //         },
+    //     >,
+    //     T,
+    // >;
 
-    type Bar = ::serde_cursor::Cursor<
-        String,
-        Foo<
-            ::serde_cursor::CursorPath<
-                ::serde_cursor::Wildcard,
-                ::serde_cursor::CursorPath<
-                    ::serde_cursor::FieldName<
-                        (
-                            ::serde_cursor::StrLen<12>,
-                            (
-                                ::serde_cursor::C1<'d'>,
-                                ::serde_cursor::C1<'e'>,
-                                ::serde_cursor::C1<'p'>,
-                                ::serde_cursor::C1<'e'>,
-                                (
-                                    ::serde_cursor::C1<'n'>,
-                                    ::serde_cursor::C1<'d'>,
-                                    ::serde_cursor::C1<'e'>,
-                                    ::serde_cursor::C1<'n'>,
-                                    ::serde_cursor::C1<'c'>,
-                                    ::serde_cursor::C1<'i'>,
-                                ),
-                                (::serde_cursor::C1<'e'>, ::serde_cursor::C1<'s'>),
-                            ),
-                        ),
-                        {
-                            [""];
-                            false
-                        },
-                    >,
-                    ::serde_cursor::CursorPath<
-                        ::serde_cursor::Index<0>,
-                        ::serde_cursor::CursorPathEnd,
-                    >,
-                >,
-            >,
-        >,
-    >;
-    // type Foxo<T> = CursorPath!(*.dependencies.$T);
+    // type Bar = ::serde_cursor::Cursor<
+    //     String,
+    //     Foo<
+    //         ::serde_cursor::CursorPath<
+    //             ::serde_cursor::Wildcard,
+    //             ::serde_cursor::CursorPath<
+    //                 ::serde_cursor::FieldName<
+    //                     (
+    //                         ::serde_cursor::StrLen<12>,
+    //                         (
+    //                             ::serde_cursor::C1<'d'>,
+    //                             ::serde_cursor::C1<'e'>,
+    //                             ::serde_cursor::C1<'p'>,
+    //                             ::serde_cursor::C1<'e'>,
+    //                             (
+    //                                 ::serde_cursor::C1<'n'>,
+    //                                 ::serde_cursor::C1<'d'>,
+    //                                 ::serde_cursor::C1<'e'>,
+    //                                 ::serde_cursor::C1<'n'>,
+    //                                 ::serde_cursor::C1<'c'>,
+    //                                 ::serde_cursor::C1<'i'>,
+    //                             ),
+    //                             (::serde_cursor::C1<'e'>, ::serde_cursor::C1<'s'>),
+    //                         ),
+    //                     ),
+    //                     {
+    //                         [""];
+    //                         false
+    //                     },
+    //                 >,
+    //                 ::serde_cursor::CursorPath<
+    //                     ::serde_cursor::Index<0>,
+    //                     ::serde_cursor::CursorPathEnd,
+    //                 >,
+    //             >,
+    //         >,
+    //     >,
+    // >;
+    // type Foxo<T> = CursorPath!(*.dependencies + T);
 
     // type Barxo = Cursor!(package.$Foxo.0: String);
 
