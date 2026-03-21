@@ -65,11 +65,11 @@ impl<'de, T: Deserialize<'de>> DeserializePath<'de, T> for CursorPathEnd {
 // Cursor!(package.name: String)
 //         ^^^^^^^ we may be here
 //
-// Cons<
+// CursorPath<
 //     Field<"package">, <-- we may be here
-//     Cons<
+//     CursorPath<
 //         Field<"name">,
-//         Nil
+//         CursorPathEnd
 //     >
 // >
 //
@@ -83,12 +83,12 @@ impl<'de, T: Deserialize<'de>> DeserializePath<'de, T> for CursorPathEnd {
 // Cursor!(package.name.whatever: String)
 //                 ^^^^^^^^^^^^^^^^^^^ all of this will be deserialized in this step
 //
-// Cons<
+// CursorPath<
 //     Field<"package">,
 //
-//     Cons<              |
+//     CursorPath<        |
 //         Field<"name">, |
-//         Nil            |
+//         CursorPathEnd  |
 //     >                  |
 //     ^^^^^^^^^^^^^^^^^^^^ all of this will be deserialized (a single recursive step)
 // >

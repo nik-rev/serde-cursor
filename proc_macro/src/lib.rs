@@ -83,7 +83,7 @@ pub fn Cursor(input: TokenStream) -> TokenStream {
         input.collect()
     };
 
-    // Type path: `CursorPath<_, CursorPath<_, CursorPathEnd>>`
+    // Cursor path: `CursorPath<_, CursorPath<_, CursorPathEnd>>`
     let cursor_path = cursor_path_segments.into_iter().rev().fold(
         path([ident("CursorPathEnd")]),
         |p, segment| {
