@@ -300,13 +300,13 @@ That macro is expanded into a [Cursor](https://docs.rs/serde_cursor/latest/serde
 ```rust
 Cursor<
     String,
-    Cons<
+    CursorPath<
         Field<"package">,
-        Cons<
+        CursorPath<
             Wildcard,
-            Cons<
+            CursorPath<
                 Field<"dependencies">,
-                Cons<Index<0>, Nil>,
+                CursorPath<Index<0>, CursorPathEnd>,
             >,
         >,
     >,
