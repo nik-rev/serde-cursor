@@ -30,7 +30,7 @@ serde_cursor = "0.1"
 
 ## Examples
 
-The [`Cursor!`](https://docs.rs/serde_cursor_impl/latest/serde_cursor_impl/macro.Cursor.html) macro makes it extremely easy to extract nested fields from data.
+The `Cursor!` macro makes it extremely easy to extract nested fields from data.
 
 ### Get version from `Cargo.toml`
 
@@ -236,7 +236,8 @@ assert_eq!(err, r#".author.id: invalid type: string "not-a-number", expected i32
 
 ## How does it work?
 
-The [`Cursor!`](https://docs.rs/serde_cursor_impl/latest/serde_cursor_impl/macro.Cursor.html) macro is a “type-level” parser. It takes your jq-like query and transforms it into a nested, recursive type that implements [`serde::Deserialize`](https://docs.rs/serde_core/1.0.228/serde_core/de/trait.Deserialize.html).
+The `Cursor!` macro expands to a recursive type that implements [`serde::Deserialize`](https://docs.rs/serde_core/1.0.228/serde_core/de/trait.Deserialize.html).
+Information on how to access the nested fields is stored entirely inside the type system.
 
 Consider this query, which gets the first dependency of every dependency in `Cargo.toml`:
 
@@ -277,15 +278,16 @@ Cursor<
 The above is essentially an equivalent to:
 
 ```rust
-vec!["package", *, "dependencies", 0]
+vec![Segment::Field("package"), Segment::Wildcard, Segment::Field("dependencies"), Segment::Index(0)]
 ```
 
 Except it exists entirely in the type system.
 
-Each time the [`Deserialize::deserialize()`](https://docs.rs/serde/latest/serde/trait.Deserialize.html#tymethod.deserialize) function is called, the first element of the type-level list is removed,
-and the rest of the list is passed to the [`Deserialize`](https://docs.rs/serde_core/1.0.228/serde_core/de/trait.Deserialize.html) trait, again.
+Each time the [`Deserialize::deserialize()`](https://docs.rs/serde/latest/serde/trait.Deserialize.html#tymethod.deserialize) function is called,
+the first element of the type-level list is removed, and the rest of the list is passed to the [`Deserialize`](https://docs.rs/serde_core/1.0.228/serde_core/de/trait.Deserialize.html) trait, again.
 
 This happens until the list is exhausted, in which case we finally get to the type of the field - the `String` in the above example,
-and finally call [`Deserialize::deserialize()`](https://docs.rs/serde/latest/serde/trait.Deserialize.html#tymethod.deserialize) on that, to finish things off.
+and finally call [`Deserialize::deserialize()`](https://docs.rs/serde/latest/serde/trait.Deserialize.html#tymethod.deserialize) on that, to finish things off -
+this `String` is then bubbled up the stack and returned from `<Cursor as Deserialize>::deserialize` .
 
 <!-- cargo-reedme: end -->
