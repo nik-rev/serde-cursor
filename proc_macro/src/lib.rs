@@ -115,17 +115,68 @@ pub fn Cursor(input: TokenStream) -> TokenStream {
     ts
 }
 
+/// Represents a single segment of a path.
 enum PathSegment {
+    /// The Wildcard, `*`.
+    ///
+    /// ```txt
+    /// Cursor!(packages.*.name)
+    ///                  ^
+    /// ```
+    ///
+    /// The `Span` is of the `*` token.
     Wildcard(Span),
-    Field(String, Span),
-    Index(u128, Span),
+    /// Field with a name.
+    Field {
+        /// Actual string value of the field.
+        ///
+        /// ```txt
+        /// Cursor!(foo.bar-baz---quux)
+        /// ```
+        ///
+        /// The `value` of the 2nd field there is "bar-baz---quux"
+        value: String,
+        /// Spans of all `-` tokens and identifiers that are part of this field.
+        ///
+        /// This `Vec` is non-empty.
+        ///
+        /// Every consecutive series of ^ represents a single span:
+        ///
+        /// ```txt
+        /// Cursor!(foo.bar-baz---quux)
+        ///             ^^^
+        ///                ^
+        ///                 ^^^
+        ///                    ^
+        ///                     ^
+        ///                      ^
+        ///                       ^^^^
+        /// ```
+        ///
+        /// We collect these spans because we want the field
+        /// to be syntax-highlighted as a single entity
+        /// (works for IDEs that support semantic highlighting)
+        spans: Vec<Span>,
+    },
+    /// Index into a sequence.
+    ///
+    /// ```txt
+    /// Cursor!(packages.*.dependencies.0)
+    ///                                 ^
+    /// ```
+    Index {
+        /// Integer value of the index, in the above case it is `0`.
+        value: u128,
+        /// Span of the integer literal.
+        span: Span,
+    },
 }
 
 impl PathSegment {
     fn to_tokens(&self) -> TokenStream {
         match self {
-            PathSegment::Field(field, span) => const_str::encode(field, *span),
-            PathSegment::Index(index, span) => {
+            PathSegment::Field { value, spans } => const_str::encode(value, spans),
+            PathSegment::Index { value: index, span } => {
                 let mut ts = path([ident("Index")]);
                 ts.extend([punct('<')]);
                 let mut lit = Literal::u128_unsuffixed(*index);
@@ -152,12 +203,37 @@ fn parse_path_segment(
     match tt {
         // Identifier fields
         //
-        // Cursor!(a.b.c: bool)
+        // Cursor!(a.b-c---d.c: bool)
         //         ^
-        TokenTree::Ident(field) => {
-            let segment = PathSegment::Field(field.to_string(), field.span());
-            input.next();
-            Ok(segment)
+        tt if matches!(tt, TokenTree::Ident(_))
+            || matches!(tt, TokenTree::Punct(p) if p.as_char() == '-') =>
+        {
+            let tt = input.next().unwrap();
+
+            let mut field = tt.to_string();
+
+            let mut spans = Vec::from([tt.span()]);
+
+            loop {
+                match input.peek() {
+                    Some(TokenTree::Ident(ident)) => {
+                        spans.push(ident.span());
+                        field.push_str(&ident.to_string());
+                        input.next().unwrap();
+                    }
+                    Some(TokenTree::Punct(p)) if p.as_char() == '-' => {
+                        spans.push(p.span());
+                        field.push('-');
+                        input.next().unwrap();
+                    }
+                    _ => break,
+                }
+            }
+
+            Ok(PathSegment::Field {
+                value: field,
+                spans,
+            })
         }
         TokenTree::Punct(p) if p.as_char() == '*' => {
             let span = p.span();
@@ -176,7 +252,7 @@ fn parse_path_segment(
                         .value::<u128>()
                         .ok_or_else(|| CompileError::new(span, "invalid integer index"))?;
                     input.next();
-                    Ok(PathSegment::Index(val, span))
+                    Ok(PathSegment::Index { value: val, span })
                 }
                 // Integer index
                 //
@@ -185,7 +261,10 @@ fn parse_path_segment(
                 litrs::Literal::String(field) => {
                     let val = field.value().to_string();
                     input.next();
-                    Ok(PathSegment::Field(val, span))
+                    Ok(PathSegment::Field {
+                        value: val,
+                        spans: Vec::from([span]),
+                    })
                 }
                 _ => {
                     Err(CompileError::new(

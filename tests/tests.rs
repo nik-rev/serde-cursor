@@ -48,6 +48,17 @@ fn crab() {
 }
 
 #[test]
+fn with_dashes() {
+    let json = json!({
+        "--dev-dependencies": {
+            "--yes": true
+        }
+    });
+
+    assert_roundtrip::<bool, Cursor!(--dev-dependencies.--yes)>(json, true);
+}
+
+#[test]
 fn wildcard_collection() {
     let json = json!([
         { "val": 10 },

@@ -33,7 +33,30 @@ pub trait ConstPathSegment {
 /// Cursor!(field.0)
 ///         ^^^^^
 /// ```
-pub struct FieldName<S: ConstStr>(PhantomData<S>);
+///
+/// # The `Z` const-generic
+///
+/// It is always `false`.
+///
+/// This const-generic only exists so we can create an arbitrary amount of string literals
+/// whos spans we associate with the user's input when they are writing the Cursor! macro
+///
+/// e.g. we want to syntax highlight the "dev-dependencies" as a single string:
+///
+/// ```txt
+/// Cursor!(dev-dependencies)
+/// ```
+///
+/// But that is made up of 3 tokens, and each of their `Span`s needs to associate with
+/// a concrete token.
+///
+/// ```txt
+/// FieldName<..., { ["", "", ""] }>
+///                   ^^ "dev"
+///                       ^^ "-"
+///                           ^^ "dependencies"
+/// ```
+pub struct FieldName<S: ConstStr, const Z: bool>(PhantomData<S>);
 
 /// Path segment representing an index into a sequence.
 ///
@@ -43,7 +66,7 @@ pub struct FieldName<S: ConstStr>(PhantomData<S>);
 /// ```
 pub struct Index<const N: usize>;
 
-impl<S: ConstStr> ConstPathSegment for FieldName<S> {
+impl<S: ConstStr> ConstPathSegment for FieldName<S, false> {
     const VALUE: PathSegment = PathSegment::Field(S::VALUE);
 }
 

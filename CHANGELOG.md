@@ -9,6 +9,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 [Unreleased]: https://github.com/nik-rev/serde-cursor/compare/v0.1.5...HEAD
 
+### Added
+
+You can now use dashes in bare field names:
+
+```rust
+let version: String = toml::from_str::<Cursor!(dev-dependencies.serde.version)>(file)?.0;
+```
+
 ## [v0.1.5] - 2026-03-20
 
 [v0.1.5]: https://github.com/nik-rev/serde-cursor/compare/v0.1.4...v0.1.5

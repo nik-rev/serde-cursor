@@ -119,6 +119,66 @@
 //! # Ok(()) }
 //! ```
 //!
+//! # Syntax
+//!
+//! The type can be inferred from context:
+//!
+//! ```
+//! # fn main() -> Result<(), Box<dyn std::error::Error>> {
+//! # let file = r#"
+//! #     [[package]]
+//! #     name = "serde"
+//! #
+//! #     [[package]]
+//! #     name = "rand"
+//! # "#;
+//! # use serde_cursor::Cursor;
+//! let packages: Vec<String> = toml::from_str::<Cursor!(package.*.name)>(file)?.0;
+//! # Ok(()) }
+//! ```
+//!
+//! The type can be specified inline:
+//!
+//! ```
+//! # fn main() -> Result<(), Box<dyn std::error::Error>> {
+//! # let file = r#"
+//! #     [[package]]
+//! #     name = "serde"
+//! #
+//! #     [[package]]
+//! #     name = "rand"
+//! # "#;
+//! # use serde_cursor::Cursor;
+//! let packages = toml::from_str::<Cursor!(package.*.name: Vec<String>)>(file)?.0;
+//! # Ok(()) }
+//! ```
+//!
+//! Any Rust identifier can be used without quotes, including `-`:
+//!
+//! ```
+//! # fn main() -> Result<(), Box<dyn std::error::Error>> {
+//! # let file = r#"
+//! #     [dev-dependencies.serde]
+//! #     version = "1.0"
+//! # "#;
+//! # use serde_cursor::Cursor;
+//! let version: String = toml::from_str::<Cursor!(dev-dependencies.serde.version)>(file)?.0;
+//! # Ok(()) }
+//! ```
+//!
+//! Fields that contain spaces or other special characters can be quoted:
+//!
+//! ```
+//! # fn main() -> Result<(), Box<dyn std::error::Error>> {
+//! # let file = r#"
+//! #     [ferris."🦀::<>"]
+//! #     "\"" = true
+//! # "#;
+//! # use serde_cursor::Cursor;
+//! let ferris: bool = toml::from_str::<Cursor!(ferris."🦀::<>".r#"""#)>(file)?.0;
+//! # Ok(()) }
+//! ```
+//!
 //! # `serde_cursor` vs [`serde_query`](https://github.com/pandaman64/serde-query)
 //!
 //! `serde_query` also implements jq-like queries, but more verbosely.

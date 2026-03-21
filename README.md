@@ -128,6 +128,34 @@ let packages = toml::from_str::<CargoLock>(file)?
     .collect::<Vec<_>>();
 ```
 
+### Syntax
+
+You’ve already seen most of it, but here are a few additional capabilities.
+
+The type can be inferred from context:
+
+```rust
+let packages: Vec<String> = toml::from_str::<Cursor!(package.*.name)>(file)?.0;
+```
+
+The type can be specified inline:
+
+```rust
+let packages = toml::from_str::<Cursor!(package.*.name: Vec<String>)>(file)?.0;
+```
+
+Any Rust identifier can be used without quotes, including `-`:
+
+```rust
+let version: String = toml::from_str::<Cursor!(dev-dependencies.serde.version)>(file)?.0;
+```
+
+Fields that contain spaces or other special characters can be quoted:
+
+```rust
+let ferris: bool = toml::from_str::<Cursor!(ferris."🦀::<>".r#"""#)>(file)?.0;
+```
+
 ## `serde_cursor` vs [`serde_query`](https://github.com/pandaman64/serde-query)
 
 `serde_query` also implements jq-like queries, but more verbosely.

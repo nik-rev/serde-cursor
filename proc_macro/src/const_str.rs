@@ -49,7 +49,7 @@ use crate::punct;
 
 /// Encodes a string literal into a nested type-level representation:
 /// `FieldName<(StrLen<N>, ( ... nested tuples of characters ... ))>`
-pub fn encode(value: &str, span: Span) -> TokenStream {
+pub fn encode(value: &str, spans: &[Span]) -> TokenStream {
     // encoding of empty string
     if value.is_empty() {
         let mut ts = path([ident("FieldName")]);
@@ -74,6 +74,8 @@ pub fn encode(value: &str, span: Span) -> TokenStream {
             Delimiter::Parenthesis,
             tuple,
         ))));
+        ts.extend([punct(',')]);
+        ts.extend([ident("false")]);
         ts.extend([punct('>')]);
         return ts;
     }
@@ -95,8 +97,7 @@ pub fn encode(value: &str, span: Span) -> TokenStream {
             };
             let mut ts = path([ident(prefix)]);
             ts.extend([punct('<')]);
-            let mut lit = Literal::character(ch);
-            lit.set_span(span);
+            let lit = Literal::character(ch);
             ts.extend(Some(TokenTree::Literal(lit)));
             ts.extend([punct('>')]);
             ts
@@ -173,6 +174,44 @@ pub fn encode(value: &str, span: Span) -> TokenStream {
         Delimiter::Parenthesis,
         inner_tuple,
     ))));
+
+    // See the comment on `FieldName` for WHY we create a bunch of garbage
+    // tokens that aren't used for anything. (tldr: syntax-highlighting in IDEs)
+    //
+    // ```txt
+    // FieldName<..., { ["", "", ""]; false }>
+    //                   ^^ "dev"
+    //                       ^^ "-"
+    //                           ^^ "dependencies"
+    // ```
+    {
+        ts.extend([punct(',')]);
+
+        // { ["", "", ""]; false }
+        //    ^^^^^^^^^^
+        let strings: TokenStream = spans
+            .iter()
+            .flat_map(|span| {
+                // { ["", "", ""]; false }
+                //    ^^
+                let mut lit = TokenTree::Literal(Literal::string(""));
+                lit.set_span(*span);
+
+                [lit, punct(',')]
+            })
+            .collect();
+
+        // { ["", "", ""]; false }
+        // ^^^^^^^^^^^^^^^^^^^^^^^
+        ts.extend([TokenTree::Group(Group::new(
+            Delimiter::Brace,
+            TokenStream::from_iter([
+                TokenTree::Group(Group::new(Delimiter::Bracket, strings)),
+                punct(';'),
+                ident("false"),
+            ]),
+        ))]);
+    }
 
     ts.extend([punct('>')]);
 
