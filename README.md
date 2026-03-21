@@ -128,9 +128,7 @@ let packages = toml::from_str::<CargoLock>(file)?
     .collect::<Vec<_>>();
 ```
 
-### Syntax
-
-You’ve already seen most of it, but here are a few additional capabilities.
+## Syntax
 
 The type can be inferred from context:
 
