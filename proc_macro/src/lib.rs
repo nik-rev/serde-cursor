@@ -11,6 +11,9 @@ use proc_macro::TokenTree;
 mod compile_error;
 use compile_error::CompileError;
 mod const_str;
+mod path;
+
+use path::Path;
 
 #[proc_macro]
 #[allow(nonstandard_style)]
@@ -87,9 +90,42 @@ pub fn Cursor(input: TokenStream) -> TokenStream {
     let cursor_path = cursor_path_segments.into_iter().rev().fold(
         path([ident("CursorPathEnd")]),
         |p, segment| {
+            let segment = match segment {
+                PathSegment::Interpolated { path, dollar: _ } => {
+                    // Interpolated<P>
+
+                    let mut ts = TokenStream::from_iter(path.into_tokens());
+
+                    // Interpolated<CursorPath<...>>
+                    //             ^
+                    ts.extend([punct('<')]);
+
+                    // Interpolated<CursorPath<...>>
+                    //              ^^^^^^^^^^^^^^^
+                    ts.extend(p);
+
+                    // Interpolated<CursorPath<...>>
+                    //                              ^
+                    ts.extend([punct('>')]);
+
+                    return ts;
+                }
+                PathSegment::Field { value, spans } => const_str::encode(&value, &spans),
+                PathSegment::Index { value: index, span } => {
+                    let mut ts = path([ident("Index")]);
+                    ts.extend([punct('<')]);
+                    let mut lit = Literal::u128_unsuffixed(index);
+                    lit.set_span(span);
+                    ts.extend(Some(TokenTree::Literal(lit)));
+                    ts.extend([punct('>')]);
+                    ts
+                }
+                PathSegment::Wildcard(_span) => path([ident("Wildcard")]),
+            };
+
             let mut ts = path([ident("CursorPath")]);
             ts.extend([punct('<')]);
-            ts.extend(segment.to_tokens());
+            ts.extend(segment);
             ts.extend([punct(',')]);
             ts.extend(p);
             ts.extend([punct('>')]);
@@ -126,6 +162,31 @@ enum PathSegment {
     ///
     /// The `Span` is of the `*` token.
     Wildcard(Span),
+    /// An interpolated path segment
+    ///
+    /// ```txt
+    /// type Deps<T> = CursorPath!(*.dependencies.$T);
+    ///
+    /// Cursor!(package.$Deps.0)
+    ///                 ^^^^^
+    /// ```
+    Interpolated {
+        /// Path to the generic type itself.
+        ///
+        /// ```txt
+        /// Cursor!(package.$Deps.0)
+        ///                 ^^^^^
+        /// ```
+        path: Path,
+        /// Span of the dollar.
+        ///
+        /// ```txt
+        /// Cursor!(package.$Deps.0)
+        ///                 ^
+        /// ```
+        #[expect(unused)]
+        dollar: Span,
+    },
     /// Field with a name.
     Field {
         /// Actual string value of the field.
@@ -172,24 +233,6 @@ enum PathSegment {
     },
 }
 
-impl PathSegment {
-    fn to_tokens(&self) -> TokenStream {
-        match self {
-            PathSegment::Field { value, spans } => const_str::encode(value, spans),
-            PathSegment::Index { value: index, span } => {
-                let mut ts = path([ident("Index")]);
-                ts.extend([punct('<')]);
-                let mut lit = Literal::u128_unsuffixed(*index);
-                lit.set_span(*span);
-                ts.extend(Some(TokenTree::Literal(lit)));
-                ts.extend([punct('>')]);
-                ts
-            }
-            PathSegment::Wildcard(_span) => path([ident("Wildcard")]),
-        }
-    }
-}
-
 fn parse_path_segment(
     input: &mut std::iter::Peekable<proc_macro::token_stream::IntoIter>,
 ) -> Result<PathSegment, CompileError> {
@@ -234,6 +277,14 @@ fn parse_path_segment(
                 value: field,
                 spans,
             })
+        }
+        TokenTree::Punct(p) if p.as_char() == '$' => {
+            let dollar = p.span();
+            let _ = input.next();
+
+            let path = Path::parse(input)?;
+
+            Ok(PathSegment::Interpolated { path, dollar })
         }
         TokenTree::Punct(p) if p.as_char() == '*' => {
             let span = p.span();
