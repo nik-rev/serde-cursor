@@ -9,6 +9,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 [Unreleased]: https://github.com/nik-rev/serde-cursor/compare/v0.2.1...HEAD
 
+### Added
+
+You can now use interpolations in cursor paths, to factor out repetitive queries:
+
+```rust
+type Details<RestOfPath> = CursorPath!(properties.timeseries.*.data.instant.details + RestOfPath);
+
+let pressure: Vec<f64> = toml::from_str::<Cursor!(france.$Details.air_pressure_at_sea_level)>(france)?.0;
+let humidity: Vec<f64> = toml::from_str::<Cursor!(japan.$Details.relative_humidity)>(japan)?.0;
+let temperature: Vec<f64> = toml::from_str::<Cursor!(japan.$Details.air_temperature)>(japan)?.0;
+```
+
 ## [v0.2.1] - 2026-03-21
 
 [v0.2.1]: https://github.com/nik-rev/serde-cursor/compare/v0.2.0...v0.2.1
