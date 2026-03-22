@@ -309,7 +309,7 @@ vec![Segment::Field("package"), Segment::IndexAll, Segment::Field("dependencies"
 Except it exists entirely in the type system.
 
 Each time the [`serde::Deserialize::deserialize()`](https://docs.rs/serde/latest/serde/trait.Deserialize.html#tymethod.deserialize) function is called,
-the first segment (`.package`) of the path is processed, and the rest of the path (`.*.dependencies.0`) is passed to the
+the first segment of the path (`.package`) is processed, and the rest of the path (`.*.dependencies.0`) is passed to the
 [`serde::Deserialize`](https://docs.rs/serde_core/1.0.228/serde_core/de/trait.Deserialize.html) trait, again, and again - until the path is empty.
 
 Once the path is empty, we finally get to the type of the field - the `String` in the above example,
