@@ -1,4 +1,4 @@
-//! This crate is an implementation detail of the `serde_cursor` crate.
+//! This crate is an implementation detail of the [`serde_cursor`](https://docs.rs/serde_cursor/latest/serde_cursor) crate.
 
 use proc_macro::Ident;
 use proc_macro::Literal;
@@ -13,32 +13,29 @@ use compile_error::CompileError;
 mod const_str;
 mod path;
 
-use path::Path;
-
-#[proc_macro]
-#[allow(nonstandard_style)]
-pub fn Path(input: TokenStream) -> TokenStream {
-    let mut input = input.into_iter().peekable();
-
-    let cursor_path_segments = match parse_path_segments(&mut input, '+') {
-        Ok(value) => value,
-        Err(compile_error) => return compile_error,
-    };
-
-    let ident = match path::ident(&mut input) {
-        Some(ident) => ident,
-        None => {
-            return CompileError::new(Span::call_site(), "expected identifier at the end").into()
-        }
-    };
-
-    // Cursor path: `Path<_, Path<_, T>>`
-    build_path(
-        cursor_path_segments,
-        TokenStream::from_iter([TokenTree::Ident(ident)]),
-    )
-}
-
+/// Access nested fields of serde-compatible data formats easily.
+///
+/// This macro expands to a type implementing [`serde::Deserialize`](https://docs.rs/serde/latest/serde/trait.Deserialize.html).
+///
+/// # Example
+///
+/// Get version from `Cargo.toml`:
+///
+/// ```
+/// use serde_cursor::Cursor;
+///
+/// # fn main() -> Result<(), Box<dyn std::error::Error>> {
+/// let data = r#"
+///     [workspace.package]
+///     version = "0.1"
+/// "#;
+///
+/// let version: String = toml::from_str::<Cursor!(workspace.package.version)>(data)?.0;
+/// assert_eq!(version, "0.1");
+/// # Ok(()) }
+/// ```
+///
+/// See the [crate-level](https://docs.rs/serde_cursor/latest/serde_cursor) documentation for more info.
 #[proc_macro]
 #[allow(nonstandard_style)]
 pub fn Cursor(input: TokenStream) -> TokenStream {
@@ -88,6 +85,83 @@ pub fn Cursor(input: TokenStream) -> TokenStream {
     ts.extend([punct('>')]);
 
     ts
+}
+
+/// Support for interpolations, `Cursor!(japan.$Details.air_temperature)`.
+///
+/// # Example
+///
+/// It's not uncommon for multiple queries to get quite repetitive:
+///
+/// ```
+/// # use serde_json::from_str;
+/// # use serde_cursor::Cursor;
+/// # fn main() -> Result<(), Box<dyn std::error::Error>> {
+/// # let france = "france = { properties = { timeseries = [{ data = { instant = { details = { air_pressure_at_sea_level = 1.0, relative_humidity = 2.0, air_temperature = 3.0 } } } }] } }";
+/// # let japan = "japan = { properties = { timeseries = [{ data = { instant = { details = { air_pressure_at_sea_level = 4.0, relative_humidity = 5.0, air_temperature = 6.0 } } } }] } }";
+/// let pressure: Vec<f64> = toml::from_str::<Cursor!(france.properties.timeseries.*.data.instant.details.air_pressure_at_sea_level)>(france)?.0;
+/// let humidity: Vec<f64> = toml::from_str::<Cursor!(japan.properties.timeseries.*.data.instant.details.relative_humidity)>(japan)?.0;
+/// let temperature: Vec<f64> = toml::from_str::<Cursor!(japan.properties.timeseries.*.data.instant.details.air_temperature)>(japan)?.0;
+/// # Ok(()) }
+/// ```
+///
+/// `serde_cursor` supports **interpolations**. You can factor out the common path into a type `Details`, and then interpolate it with `$Details` in the path.
+///
+/// ```
+/// # use serde_json::from_str;
+/// # fn main() -> Result<(), Box<dyn std::error::Error>> {
+/// # let france = "france = { properties = { timeseries = [{ data = { instant = { details = { air_pressure_at_sea_level = 1.0, relative_humidity = 2.0, air_temperature = 3.0 } } } }] } }";
+/// # let japan = "japan = { properties = { timeseries = [{ data = { instant = { details = { air_pressure_at_sea_level = 4.0, relative_humidity = 5.0, air_temperature = 6.0 } } } }] } }";
+/// # use serde_cursor::Cursor;
+/// type Details<RestOfPath> = serde_cursor::Path!(properties.timeseries.*.data.instant.details + RestOfPath);
+///
+/// let pressure: Vec<f64> = toml::from_str::<Cursor!(france.$Details.air_pressure_at_sea_level)>(france)?.0;
+/// let humidity: Vec<f64> = toml::from_str::<Cursor!(japan.$Details.relative_humidity)>(japan)?.0;
+/// let temperature: Vec<f64> = toml::from_str::<Cursor!(japan.$Details.air_temperature)>(japan)?.0;
+/// # Ok(()) }
+/// ```
+///
+/// # Under the hood
+///
+/// The type returned `Cursor!` here:
+///
+/// ```
+/// # type C =
+/// serde_cursor::Cursor!(package.*.dependencies: String)
+/// # ;
+/// ```
+///
+/// Is equivalent to the `Cursor` **type**, with the 2nd argument being a call of the `Path!` macro:
+///
+/// ```
+/// # type C =
+/// serde_cursor::Cursor<String, serde_cursor::Path!(package.*.dependencies + serde_cursor::Nil)>
+/// # ;
+/// ```
+///
+/// See the [crate-level](https://docs.rs/serde_cursor/latest/serde_cursor) documentation for more info.
+#[proc_macro]
+#[allow(nonstandard_style)]
+pub fn Path(input: TokenStream) -> TokenStream {
+    let mut input = input.into_iter().peekable();
+
+    let cursor_path_segments = match parse_path_segments(&mut input, '+') {
+        Ok(value) => value,
+        Err(compile_error) => return compile_error,
+    };
+
+    let ident = match path::ident(&mut input) {
+        Some(ident) => ident,
+        None => {
+            return CompileError::new(Span::call_site(), "expected identifier at the end").into()
+        }
+    };
+
+    // Cursor path: `Path<_, Path<_, T>>`
+    build_path(
+        cursor_path_segments,
+        TokenStream::from_iter([TokenTree::Ident(ident)]),
+    )
 }
 
 fn build_path(cursor_path_segments: Vec<PathSegment>, end: TokenStream) -> TokenStream {
@@ -215,7 +289,7 @@ enum PathSegment {
         /// Cursor!(package.$Deps.0)
         ///                 ^^^^^
         /// ```
-        path: Path,
+        path: path::Path,
         /// Span of the dollar.
         ///
         /// ```txt
@@ -320,7 +394,7 @@ fn parse_path_segment(
             let dollar = p.span();
             let _ = input.next();
 
-            let path = Path::parse(input)?;
+            let path = path::Path::parse(input)?;
 
             Ok(PathSegment::Interpolated { path, dollar })
         }

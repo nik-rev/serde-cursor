@@ -89,7 +89,7 @@
 //!
 //! # Syntax
 //!
-//! Specify the type after the path:
+//! Specify the type `Vec<String>` after the path `package.*.name`:
 //!
 //! ```
 //! # fn main() -> Result<(), Box<dyn std::error::Error>> {
@@ -118,22 +118,6 @@
 //! # "#;
 //! # use serde_cursor::Cursor;
 //! let packages: Vec<String> = toml::from_str::<Cursor!(package.*.name)>(file)?.0;
-//! # Ok(()) }
-//! ```
-//!
-//! Equivalent to:
-//!
-//! ```
-//! # fn main() -> Result<(), Box<dyn std::error::Error>> {
-//! # let file = r#"
-//! #     [[package]]
-//! #     name = "serde"
-//! #
-//! #     [[package]]
-//! #     name = "rand"
-//! # "#;
-//! # use serde_cursor::Cursor;
-//! let packages: Vec<String> = toml::from_str::<Cursor!(package.*.name: _)>(file)?.0;
 //! # Ok(()) }
 //! ```
 //!
@@ -415,37 +399,6 @@ pub use path_segment::PathSegment;
 pub use path_segment::Wildcard;
 #[doc(hidden, inline)]
 pub use ser::SerializePath;
-/// Access nested fields of values easily.
-///
-/// ```toml
-/// # Cargo.toml
-/// [workspace.package]
-/// version = "0.1"
-/// ```
-///
-/// To access nested fields, use dotted field syntax:
-///
-/// ```
-/// # mod fs { pub fn read_to_string(_: &str) -> Result<String, Box<dyn std::error::Error>> { Ok(String::from("workspace = { package = { version = '0.1' } }")) } }
-/// use serde_cursor::Cursor;
-///
-/// # fn main() -> Result<(), Box<dyn std::error::Error>> {
-/// let data = fs::read_to_string("Cargo.toml")?;
-///
-/// let version: String = toml::from_str::<Cursor!(workspace.package.version)>(&data)?.0;
-/// assert_eq!(version, "0.1");
-/// # Ok(()) }
-/// ```
-///
-/// You can access elements of arrays:
-///
-/// ```toml
-/// # Cargo.toml
-/// [workspace.package]
-/// version = "0.1"
-/// ```
-///
-/// See the [crate-level](crate) documentation for more.
 #[doc(inline)]
 pub use serde_cursor_impl::Cursor;
 #[doc(inline)]

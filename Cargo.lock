@@ -482,6 +482,12 @@ name = "serde_cursor_impl"
 version = "0.2.1"
 dependencies = [
  "litrs",
+ "serde",
+ "serde-query",
+ "serde_core",
+ "serde_cursor",
+ "serde_json",
+ "toml",
 ]
 
 [[package]]
