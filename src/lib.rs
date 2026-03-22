@@ -279,7 +279,7 @@
 //!
 //! # Great error messages
 //!
-//! When deserialization fails, you get the exact path of where the failure occurred.
+//! When deserialization fails, you get the exact path of where the failure occurred:
 //!
 //! ```
 //! use serde_cursor::Cursor;
@@ -345,14 +345,17 @@
 //! ```rust
 //! # /*
 //! Cursor<
-//!     String,
+//!     String, // : String
 //!     Path<
-//!         Field<"package">,
+//!         Field<"package">, // .package
 //!         Path<
-//!             IndexAll,
+//!             IndexAll, // .*
 //!             Path<
-//!                 Field<"dependencies">,
-//!                 Path<Index<0>, PathEnd>,
+//!                 Field<"dependencies">, // .dependencies
+//!                 Path<
+//!                     Index<0>, // .0
+//!                     PathEnd
+//!                 >,
 //!             >,
 //!         >,
 //!     >,
