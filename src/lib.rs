@@ -248,10 +248,6 @@
 //! # Ok(()) }
 //! ```
 //!
-//! In a cursor path, everything after in an interpolation gets passed as that type's generic. So, `Cursor!(japan.$Details.air_temperature)` calls
-//! `Details<.air_temperature>`, and that `+ RestOfPath` at the end of the `CursorPath!` macro call in the definition of the `Details<RestOfPath>` type means
-//! the `.air_temperature` path is added at the end of the cursor path, becoming `CursorPath!(properties.timeseries.*.data.instant.details.air_temperature)`.
-//!
 //! # `serde_cursor` vs [`serde_query`](https://github.com/pandaman64/serde-query)
 //!
 //! `serde_query` also implements jq-like queries, but more verbosely.
@@ -445,37 +441,6 @@ pub use path_segment::FieldName;
 pub use path_segment::Index;
 pub use path_segment::PathSegment;
 pub use ser::SerializeCursor;
-/// Access nested fields of values easily.
-///
-/// ```toml
-/// # Cargo.toml
-/// [workspace.package]
-/// version = "0.1"
-/// ```
-///
-/// To access nested fields, use dotted field syntax:
-///
-/// ```
-/// # mod fs { pub fn read_to_string(_: &str) -> Result<String, Box<dyn std::error::Error>> { Ok(String::from("workspace = { package = { version = '0.1' } }")) } }
-/// use serde_cursor::Cursor;
-///
-/// # fn main() -> Result<(), Box<dyn std::error::Error>> {
-/// let data = fs::read_to_string("Cargo.toml")?;
-///
-/// let version: String = toml::from_str::<Cursor!(workspace.package.version)>(&data)?.0;
-/// assert_eq!(version, "0.1");
-/// # Ok(()) }
-/// ```
-///
-/// You can access elements of arrays:
-///
-/// ```toml
-/// # Cargo.toml
-/// [workspace.package]
-/// version = "0.1"
-/// ```
-///
-/// See the [crate-level](crate) documentation for more.
 #[doc(inline)]
 pub use serde_cursor_impl::Cursor;
 #[doc(inline)]

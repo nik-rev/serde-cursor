@@ -188,10 +188,6 @@ let humidity: Vec<f64> = toml::from_str::<Cursor!(japan.$Details.relative_humidi
 let temperature: Vec<f64> = toml::from_str::<Cursor!(japan.$Details.air_temperature)>(japan)?.0;
 ```
 
-In a cursor path, everything after in an interpolation gets passed as that type’s generic. So, `Cursor!(japan.$Details.air_temperature)` calls
-`Details<.air_temperature>`, and that `+ RestOfPath` at the end of the `CursorPath!` macro call in the definition of the `Details<RestOfPath>` type means
-the `.air_temperature` path is added at the end of the cursor path, becoming `CursorPath!(properties.timeseries.*.data.instant.details.air_temperature)`.
-
 ## `serde_cursor` vs [`serde_query`](https://github.com/pandaman64/serde-query)
 
 `serde_query` also implements jq-like queries, but more verbosely.
