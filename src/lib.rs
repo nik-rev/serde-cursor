@@ -31,7 +31,7 @@
 //! # Ok(()) }
 //! ```
 //!
-//! `Cursor!(workspace.package.version)` is the magic juice - this type-macro expands to a type that implements [`Deserialize`](serde_core::Deserialize).
+//! `Cursor!(workspace.package.version)` is the magic juice - this type-macro expands to a type that implements [`serde::Deserialize`](serde_core::Deserialize).
 //!
 //! **Without `serde_cursor`**:
 //!
@@ -84,38 +84,6 @@
 //! let packages: Vec<String> = toml::from_str::<Cursor!(package.*.name)>(file)?.0;
 //!
 //! assert_eq!(packages, vec!["serde", "rand"]);
-//! # Ok(()) }
-//! ```
-//!
-//! **Without `serde_cursor`**:
-//!
-//! ```
-//! use serde::Deserialize;
-//!
-//! #[derive(Deserialize)]
-//! struct CargoLock {
-//!     package: Vec<Package>
-//! }
-//!
-//! #[derive(Deserialize)]
-//! struct Package {
-//!     name: String
-//! }
-//!
-//! # fn main() -> Result<(), Box<dyn std::error::Error>> {
-//! let file = r#"
-//!     [[package]]
-//!     name = "serde"
-//!
-//!     [[package]]
-//!     name = "rand"
-//! "#;
-//!
-//! let packages = toml::from_str::<CargoLock>(file)?
-//!     .package
-//!     .into_iter()
-//!     .map(|pkg| pkg.name)
-//!     .collect::<Vec<_>>();
 //! # Ok(()) }
 //! ```
 //!
