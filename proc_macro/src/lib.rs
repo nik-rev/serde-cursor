@@ -135,7 +135,7 @@ pub fn Cursor(input: TokenStream) -> TokenStream {
 ///
 /// ```
 /// # type C =
-/// serde_cursor::Cursor<String, serde_cursor::Path!(package.*.dependencies + serde_cursor::Nil)>
+/// serde_cursor::Cursor<String, serde_cursor::Path!(package.*.dependencies + serde_cursor::PathEnd)>
 /// # ;
 /// ```
 ///
@@ -150,17 +150,15 @@ pub fn Path(input: TokenStream) -> TokenStream {
         Err(compile_error) => return compile_error,
     };
 
-    let ident = match path::ident(&mut input) {
-        Some(ident) => ident,
-        None => {
-            return CompileError::new(Span::call_site(), "expected identifier at the end").into()
-        }
+    let path = match path::Path::parse(&mut input) {
+        Ok(ident) => ident,
+        Err(compile_error) => return compile_error.into(),
     };
 
     // Cursor path: `Path<_, Path<_, T>>`
     build_path(
         cursor_path_segments,
-        TokenStream::from_iter([TokenTree::Ident(ident)]),
+        TokenStream::from_iter(path.into_tokens()),
     )
 }
 

@@ -111,7 +111,7 @@ impl Path {
         // ::std::hash::Hash
         //   ^^^
         let first_component =
-            ident(ts).ok_or_else(|| CompileError::new(Span::call_site(), "invalid path 1"))?;
+            ident(ts).ok_or_else(|| CompileError::new(Span::call_site(), "invalid path"))?;
 
         let mut components = Vec::new();
 
@@ -133,10 +133,10 @@ impl Path {
             }
 
             let separator = PathSeparator::parse(ts)
-                .ok_or_else(|| CompileError::new(Span::call_site(), "invalid path 2"))?;
+                .ok_or_else(|| CompileError::new(Span::call_site(), "invalid path"))?;
 
             let component =
-                ident(ts).ok_or_else(|| CompileError::new(Span::call_site(), "invalid path 3"))?;
+                ident(ts).ok_or_else(|| CompileError::new(Span::call_site(), "invalid path"))?;
 
             components.push((separator, (component)));
         }

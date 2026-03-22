@@ -100,7 +100,7 @@ assert_eq!(packages, vec!["serde", "rand"]);
 
 ## Syntax
 
-Specify the type after the path:
+Specify the type `Vec<String>` after the path `package.*.name`:
 
 ```rust
 let packages = toml::from_str::<Cursor!(package.*.name: Vec<String>)>(file)?.0;
@@ -110,12 +110,6 @@ The type can be omitted, in which case it will be inferred:
 
 ```rust
 let packages: Vec<String> = toml::from_str::<Cursor!(package.*.name)>(file)?.0;
-```
-
-Equivalent to:
-
-```rust
-let packages: Vec<String> = toml::from_str::<Cursor!(package.*.name: _)>(file)?.0;
 ```
 
 Fields that consist of identifiers and `-`s can be used without quotes:
@@ -316,6 +310,6 @@ the first element of the type-level list is removed, and the rest of the list is
 
 This happens until the list is exhausted, in which case we finally get to the type of the field - the `String` in the above example,
 and finally call [`Deserialize::deserialize()`](https://docs.rs/serde/latest/serde/trait.Deserialize.html#tymethod.deserialize) on that, to finish things off -
-this `String` is then bubbled up the stack and returned from `<Cursor as Deserialize>::deserialize` .
+this `String` is then bubbled up the stack and returned from `<Cursor as Deserialize>::deserialize`.
 
 <!-- cargo-reedme: end -->
