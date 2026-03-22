@@ -21,7 +21,7 @@ cargo-reedme: info-end -->
 ![msrv](https://img.shields.io/badge/msrv-1.78-blue?style=flat-square&logo=rust)
 [![github](https://img.shields.io/github/stars/nik-rev/serde-cursor)](https://github.com/nik-rev/serde-cursor)
 
-This crate allows you to declaratively specify how to fetch the desired parts of a serde-compatible data format
+This crate allows you to declaratively specify how to fetch the desired parts of a serde-compatible data format such as JSON
 efficiently, without loading it all into memory, using a jq-like language.
 
 ```toml
