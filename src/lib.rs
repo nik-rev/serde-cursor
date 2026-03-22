@@ -5,7 +5,7 @@
 //! [![github](https://img.shields.io/github/stars/nik-rev/serde-cursor)](https://github.com/nik-rev/serde-cursor)
 //!
 //! This crate allows you to declaratively specify how to fetch the desired parts of a serde-compatible data format
-//! efficiently, without loading it all into memory, using a [jq](https://jqlang.org/tutorial/)-like language.
+//! efficiently, without loading it all into memory, using a jq-like language.
 //!
 //! ```toml
 #![doc = concat!(env!("CARGO_PKG_NAME"), " = ", "\"", env!("CARGO_PKG_VERSION_MAJOR"), ".", env!("CARGO_PKG_VERSION_MINOR"), "\"")]
