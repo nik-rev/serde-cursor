@@ -479,12 +479,14 @@ mod cursor {
     }
 }
 
-/// Available if you need to implement a trait for the type returned by `Cursor!`.
+/// Available if you need to implement a trait for the type returned by `Cursor!`,
+/// or implement the `Sequence` trait to have the index-all `.*` syntax work with
+/// more collections.
 ///
-/// This module only exists in the generated documentation to group items that are
+/// This module only shows up in the generated documentation to group items that are
 /// implementation details together, but it doesn't actually exist.
 ///
-/// All of these items are exported from the crate root, but `#[doc(hidden)]`.
+/// All of these items are exported from the crate root, but hidden.
 #[cfg(doc)]
 #[doc(cfg(doc))]
 pub mod implementation_details {
@@ -536,7 +538,7 @@ mod path {
     #[doc(hidden)]
     pub struct PathEnd;
 
-    /// Represents a single segment of a cursor path.
+    /// Represents a single segment of a cursor path. This type is returned by the [`Path!`](crate::Path!) macro.
     #[doc(hidden)]
     pub struct Path<S, P>(PhantomData<(S, P)>);
 }

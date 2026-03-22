@@ -5,6 +5,7 @@ use std::collections::VecDeque;
 use std::hash::Hash;
 
 /// Sequences of items, such as [`Vec<T>`] or [`HashSet<T>`].
+/// The index-all `.*` syntax requires this trait to be implemented.
 ///
 /// The purpose of this trait is to enable the index-all `.*.` syntax
 /// when collecting fields of an array:

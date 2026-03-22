@@ -22,12 +22,12 @@ pub enum PathSegment {
     Index(usize),
 }
 
-/// Equivalent to <code>const PATH_SEGMENT: [PathSegment]</code>, except it works on stable Rust.
+/// Equivalent to `const PATH_SEGMENT: PathSegment`, except it works on stable Rust.
 pub trait ConstPathSegment {
     const VALUE: PathSegment;
 }
 
-/// Path segment for accessing a specific field of a map.
+/// Accessing a specific field of a map.
 /// Represents the `package` in `Cursor!(package.0)`.
 ///
 /// ```txt
@@ -59,7 +59,7 @@ pub trait ConstPathSegment {
 /// ```
 pub struct Field<S: ConstStr, const Z: bool>(PhantomData<S>);
 
-/// Path segment for accessing a specific index of a sequence.
+/// Access a specific element of a sequence.
 /// Represents the `0` in `Cursor!(package.*.dependencies.0)`.
 ///
 /// ```txt
@@ -68,7 +68,7 @@ pub struct Field<S: ConstStr, const Z: bool>(PhantomData<S>);
 /// ```
 pub struct Index<const N: usize>;
 
-/// Path segment for accessing all elements of a sequence.
+/// Access all elements of a sequence.
 /// Represents the `*` in `Cursor!(package.*.dependencies.0)`.
 #[doc(hidden)]
 pub struct IndexAll;
