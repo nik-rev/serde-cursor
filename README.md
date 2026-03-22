@@ -279,7 +279,7 @@ name = "cc"
 dependencies = ["find-msvc-tools", "shlex"]
 ```
 
-That macro is expanded into a `Cursor` type, which implements [Deserialize](https://docs.rs/serde_core/1.0.228/serde_core/de/trait.Deserialize.html) and [Serialize](https://docs.rs/serde_core/1.0.228/serde_core/ser/trait.Serialize.html):
+That macro is expanded into a `Cursor` type, which implements [`serde::Deserialize`](https://docs.rs/serde_core/1.0.228/serde_core/de/trait.Deserialize.html) and [`serde::Serialize`](https://docs.rs/serde_core/1.0.228/serde_core/ser/trait.Serialize.html):
 
 ```rust
 Cursor<
@@ -308,11 +308,11 @@ vec![Segment::Field("package"), Segment::IndexAll, Segment::Field("dependencies"
 
 Except it exists entirely in the type system.
 
-Each time the [`Deserialize::deserialize()`](https://docs.rs/serde/latest/serde/trait.Deserialize.html#tymethod.deserialize) function is called,
-the first element of the type-level list is removed, and the rest of the list is passed to the [`Deserialize`](https://docs.rs/serde_core/1.0.228/serde_core/de/trait.Deserialize.html) trait, again.
+Each time the [`serde::Deserialize::deserialize()`](https://docs.rs/serde/latest/serde/trait.Deserialize.html#tymethod.deserialize) function is called,
+the first element of the type-level list is removed, and the rest of the list is passed to the [`serde::Deserialize`](https://docs.rs/serde_core/1.0.228/serde_core/de/trait.Deserialize.html) trait, again.
 
 This happens until the list is exhausted, in which case we finally get to the type of the field - the `String` in the above example,
-and finally call [`Deserialize::deserialize()`](https://docs.rs/serde/latest/serde/trait.Deserialize.html#tymethod.deserialize) on that, to finish things off -
-this `String` is then bubbled up the stack and returned from `<Cursor as Deserialize>::deserialize`.
+and finally call [`serde::Deserialize::deserialize()`](https://docs.rs/serde/latest/serde/trait.Deserialize.html#tymethod.deserialize) on that, to finish things off -
+this `String` is then bubbled up the stack and returned from `<Cursor as serde::Deserialize>::deserialize`.
 
 <!-- cargo-reedme: end -->

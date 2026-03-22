@@ -340,7 +340,7 @@
 //! dependencies = ["find-msvc-tools", "shlex"]
 //! ```
 //!
-//! That macro is expanded into a `Cursor` type, which implements [Deserialize](serde_core::Deserialize) and [Serialize](serde_core::Serialize):
+//! That macro is expanded into a `Cursor` type, which implements [`serde::Deserialize`](serde_core::Deserialize) and [`serde::Serialize`](serde_core::Serialize):
 //!
 //! ```rust
 //! # /*
@@ -373,12 +373,12 @@
 //!
 //! Except it exists entirely in the type system.
 //!
-//! Each time the [`Deserialize::deserialize()`](https://docs.rs/serde/latest/serde/trait.Deserialize.html#tymethod.deserialize) function is called,
-//! the first element of the type-level list is removed, and the rest of the list is passed to the [`Deserialize`](serde_core::Deserialize) trait, again.
+//! Each time the [`serde::Deserialize::deserialize()`](https://docs.rs/serde/latest/serde/trait.Deserialize.html#tymethod.deserialize) function is called,
+//! the first element of the type-level list is removed, and the rest of the list is passed to the [`serde::Deserialize`](serde_core::Deserialize) trait, again.
 //!
 //! This happens until the list is exhausted, in which case we finally get to the type of the field - the `String` in the above example,
-//! and finally call [`Deserialize::deserialize()`](https://docs.rs/serde/latest/serde/trait.Deserialize.html#tymethod.deserialize) on that, to finish things off -
-//! this `String` is then bubbled up the stack and returned from `<Cursor as Deserialize>::deserialize`.
+//! and finally call [`serde::Deserialize::deserialize()`](https://docs.rs/serde/latest/serde/trait.Deserialize.html#tymethod.deserialize) on that, to finish things off -
+//! this `String` is then bubbled up the stack and returned from `<Cursor as serde::Deserialize>::deserialize`.
 #![cfg_attr(doc, feature(doc_cfg))]
 #![allow(rustdoc::invalid_rust_codeblocks)]
 
