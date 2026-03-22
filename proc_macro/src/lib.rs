@@ -363,12 +363,7 @@ fn parse_path_segment(
                 }
             }
         }
-        _ => {
-            Err(CompileError::new(
-                tt.span(),
-                "unexpected token in path segment",
-            ))
-        }
+        _ => Err(CompileError::new(tt.span(), "unexpected token")),
     }
 }
 

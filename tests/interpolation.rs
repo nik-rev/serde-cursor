@@ -94,3 +94,21 @@ fn with_wildcard() -> evil::Result {
 
     evil::Ok(())
 }
+
+/// In previous tests we just used `$Ident`, but here, we use a path with non-zero segments
+#[test]
+fn path() -> evil::Result {
+    let data = json!({ "properties": { "timeseries": { "data": [1.0] } } });
+
+    mod inner {
+        use super::*;
+        pub type Details<T> = CursorPath!(timeseries + T);
+    }
+
+    let timeseries: Vec<f64> =
+        serde_json::from_value::<Cursor!(properties.$inner::Details.data)>(data)?.0;
+
+    assert_eq!(timeseries, vec![1.0]);
+
+    evil::Ok(())
+}

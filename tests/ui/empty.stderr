@@ -1,4 +1,4 @@
-error: unexpected token in path segment
+error: unexpected token
  --> tests/ui/empty.rs:7:18
   |
 7 | type Y = Cursor!(: i32);

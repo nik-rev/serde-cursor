@@ -1,4 +1,4 @@
-error: unexpected token in path segment
+error: unexpected token
  --> tests/ui/trailing_punct.rs:4:19
   |
 4 | type X = Cursor!( . );

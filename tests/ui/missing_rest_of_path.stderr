@@ -1,0 +1,16 @@
+error: expected identifier at the end
+ --> tests/ui/missing_rest_of_path.rs:4:13
+  |
+4 | type X<T> = CursorPath!(foo.bar);
+  |             ^^^^^^^^^^^^^^^^^^^^
+  |
+  = note: this error originates in the macro `CursorPath` (in Nightly builds, run with -Z macro-backtrace for more info)
+
+error[E0091]: type parameter `T` is never used
+ --> tests/ui/missing_rest_of_path.rs:4:8
+  |
+4 | type X<T> = CursorPath!(foo.bar);
+  |        ^ unused type parameter
+  |
+  = help: consider removing `T` or referring to it in the body of the type alias
+  = help: if you intended `T` to be a const parameter, use `const T: /* Type */` instead
