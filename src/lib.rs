@@ -431,19 +431,21 @@ mod de;
 mod path_segment;
 mod ser;
 
-#[doc(inline)]
+#[doc(hidden, inline)]
 pub use cursor::Cursor;
-#[doc(hidden)]
+#[doc(hidden, inline)]
 pub use de::DeserializePath;
-#[doc(hidden)]
+#[doc(hidden, inline)]
 pub use path_segment::ConstPathSegment;
-#[doc(hidden)]
+#[doc(hidden, inline)]
 pub use path_segment::Field;
-#[doc(hidden)]
+#[doc(hidden, inline)]
 pub use path_segment::Index;
-#[doc(hidden)]
+#[doc(hidden, inline)]
 pub use path_segment::PathSegment;
-#[doc(hidden)]
+#[doc(hidden, inline)]
+pub use path_segment::Wildcard;
+#[doc(hidden, inline)]
 pub use ser::SerializePath;
 /// Access nested fields of values easily.
 ///
@@ -558,10 +560,12 @@ mod cursor {
 
 /// Available if you need to implement a trait for the type returned by `Cursor!`.
 ///
-/// This module only exists in the documentation to group items that are an implementation
-/// details together. All of these items are actually exported from the crate root, but `#[doc(hidden)]`.
-// #[cfg(doc)]
-// #[doc(cfg(doc))]
+/// This module only exists in the generated documentation to group items that are
+/// implementation details together, but it doesn't actually exist.
+///
+/// All of these items are exported from the crate root, but `#[doc(hidden)]`.
+#[cfg(doc)]
+#[doc(cfg(doc))]
 pub mod implementation_details {
     #[doc(inline)]
     pub use crate::const_str;
@@ -593,15 +597,15 @@ pub mod const_str;
 // This only exists to make the generated macro output
 // slightly more sane
 
-#[doc(hidden)]
+#[doc(hidden, inline)]
 pub use const_str::Char1Byte as C1;
-#[doc(hidden)]
+#[doc(hidden, inline)]
 pub use const_str::Char2Byte as C2;
-#[doc(hidden)]
+#[doc(hidden, inline)]
 pub use const_str::Char3Byte as C3;
-#[doc(hidden)]
+#[doc(hidden, inline)]
 pub use const_str::Char4Byte as C4;
-#[doc(hidden)]
+#[doc(hidden, inline)]
 pub use const_str::StrLen;
 
 mod path {
@@ -616,13 +620,11 @@ mod path {
     pub struct Path<S, P>(PhantomData<(S, P)>);
 }
 
+#[doc(hidden, inline)]
 pub use path::Path;
+#[doc(hidden, inline)]
 pub use path::PathEnd;
 
-/// Represents the `*` in `Cursor!(package.*.name)`.
-#[doc(hidden)]
-pub struct Wildcard;
-
 mod sequence;
-#[doc(hidden)]
+#[doc(hidden, inline)]
 pub use sequence::Sequence;

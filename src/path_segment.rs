@@ -27,7 +27,8 @@ pub trait ConstPathSegment {
     const VALUE: PathSegment;
 }
 
-/// Path segment representing the field of a map.
+/// Path segment for accessing a specific field of a map.
+/// Represents the `package` in `Cursor!(package.0)`.
 ///
 /// ```txt
 /// Cursor!(field.0)
@@ -58,13 +59,19 @@ pub trait ConstPathSegment {
 /// ```
 pub struct Field<S: ConstStr, const Z: bool>(PhantomData<S>);
 
-/// Path segment representing an index into a sequence.
+/// Path segment for accessing a specific index of a sequence.
+/// Represents the `0` in `Cursor!(package.*.dependencies.0)`.
 ///
 /// ```txt
 /// Cursor!(field.0)
 ///               ^
 /// ```
 pub struct Index<const N: usize>;
+
+/// Path segment for accessing all elements of a sequence.
+/// Represents the `*` in `Cursor!(package.*.dependencies.0)`.
+#[doc(hidden)]
+pub struct Wildcard;
 
 impl<S: ConstStr> ConstPathSegment for Field<S, false> {
     const VALUE: PathSegment = PathSegment::Field(S::VALUE);
