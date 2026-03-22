@@ -43,6 +43,7 @@ keywords = ["serde", "macros", "serialization", "serde-query", "query"]
 categories = ["encoding", "development-tools", "development-tools::procedural-macro-helpers", "no-std", "rust-patterns"]
 
 [dev-dependencies]
+evil = "0.2.2"
 serde = { version = "1.0.228", features = ["derive"] }
 serde-query = "0.2.0"
 serde_json = "1.0.149"

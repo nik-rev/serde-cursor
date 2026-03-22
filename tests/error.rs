@@ -1,3 +1,5 @@
+#![allow(clippy::type_complexity)]
+
 use serde_cursor::Cursor;
 use serde_json::from_value;
 use serde_json::json;
@@ -49,4 +51,27 @@ fn test_error_deep_wildcard_mismatch() {
         err,
         ".org.users[1].id: invalid type: string \"invalid\", expected i32"
     );
+}
+
+#[test]
+fn type_mismatch_error() {
+    let json = json!({ "a": { "not_an_array": 42 } });
+
+    // path expects an array at index 0, but finds a map
+    let result = serde_json::from_value::<Cursor!(a.0: i32)>(json);
+
+    assert!(result.is_err());
+}
+
+#[test]
+fn empty_json_behaviors() {
+    // path exists but value is null
+    let json = json!({"a": null});
+    let cursor: Cursor!(a: Option<i32>) = serde_json::from_value(json).unwrap();
+    assert_eq!(*cursor, None);
+
+    // index into empty array
+    let json_empty_arr = json!({"arr": []});
+    let cursor_idx: Result<Cursor!(arr.5: i32), _> = serde_json::from_value(json_empty_arr);
+    assert!(cursor_idx.is_err());
 }
