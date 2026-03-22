@@ -485,7 +485,7 @@ mod cursor {
     use core::fmt;
     use std::marker::PhantomData;
 
-    /// Type returned by the [`Cursor!`] macro.
+    /// Type returned by the [`Cursor!`](crate::Cursor!) macro.
     #[doc(hidden)]
     pub struct Cursor<T, P>(pub T, #[doc(hidden)] pub PhantomData<P>);
 
