@@ -508,6 +508,7 @@ dependencies = [
  "serde",
  "serde-query",
  "serde_core",
+ "serde_cursor",
  "serde_json",
  "toml",
 ]
