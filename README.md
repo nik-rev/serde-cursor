@@ -138,7 +138,6 @@ The [`monostate`](https://github.com/dtolnay/monostate) crate provides the `Must
 Together, these 2 crates provide an almost jq-like experience of data processing in Rust:
 
 ```rust
-/*
 get!(reason: MustBe!("compiler-message"))?;
 get!(message.message: MustBe!("trace_macro"))?;
 
@@ -147,7 +146,6 @@ Ok(Expansion {
     byte_start: get!(message.spans.0.byte_start)?,
     byte_end: get!(message.spans.0.byte_end)?,
 })
-*/
 ```
 
 The jq version of the above processing looks like this:
