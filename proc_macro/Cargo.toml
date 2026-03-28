@@ -1,12 +1,12 @@
 [package]
 name = "serde_cursor_impl"
-description = "implementation detail of the serde_cursor crate"
 version.workspace = true
-rust-version.workspace = true
 authors.workspace = true
-license.workspace = true
 edition.workspace = true
+rust-version.workspace = true
+description = "implementation detail of the serde_cursor crate"
 repository.workspace = true
+license.workspace = true
 
 [package.metadata.release]
 tag = false
@@ -18,9 +18,9 @@ proc-macro = true
 litrs = "1.0.0"
 
 [dev-dependencies]
-serde_cursor = { version = "0.3.0", path = ".." }
 serde = { version = "1.0.228", features = ["derive"] }
 serde_core = "1.0.228"
-serde-query = "0.2.0"
+serde_cursor = { path = "..", version = "0.3.0" }
 serde_json = "1.0.149"
+serde-query = "0.2.0"
 toml = "1.0"

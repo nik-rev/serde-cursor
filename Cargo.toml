@@ -1,28 +1,15 @@
 [package]
 name = "serde_cursor"
-description = "fetch the desired parts of a serde-compatible data format efficiently using a jq-like language"
 version.workspace = true
-edition.workspace = true
-rust-version.workspace = true
 authors.workspace = true
+rust-version.workspace = true
+description = "fetch the desired parts of a serde-compatible data format efficiently using a jq-like language"
+edition.workspace = true
 repository.workspace = true
 license.workspace = true
 
 [package.metadata.docs.rs]
 all-features = true
-
-[dependencies]
-serde_cursor_impl = { version = "0.3.1", path = "proc_macro" }
-
-serde_core = { version = "1.0.228", default-features = false }
-
-serde_with = { version = "3.18", optional = true }
-
-[features]
-default = ["std"]
-alloc = ["serde_core/alloc", "serde_with?/alloc"]
-std = ["serde_core/std", "serde_with?/std", "alloc"]
-serde_with = ["dep:serde_with"]
 
 [package.metadata.release]
 pre-release-hook = ["cargo", "+nightly", "reedme"]
@@ -37,27 +24,46 @@ pre-release-replacements = [
 ## [v{{version}}] - {{date}}""", exactly = 1 },
 ]
 
+[workspace]
+resolver = "2"
+members = [".", "proc_macro"]
+
 [workspace.package]
 version = "0.3.1"
-description = "serde cursor"
-license = "MIT OR Apache-2.0"
-edition = "2021"
-rust-version = "1.78"
 authors = ["Nik Revenco <pm@nikrev.com>"]
+edition = "2024"
+rust-version = "1.85"
+description = "serde cursor"
 repository = "https://github.com/nik-rev/serde-cursor"
-keywords = ["serde", "macros", "serialization", "serde-query", "query"]
-categories = ["encoding", "development-tools", "development-tools::procedural-macro-helpers", "no-std", "rust-patterns"]
+license = "MIT OR Apache-2.0"
+keywords = ["macros", "query", "serde", "serde-query", "serialization"]
+categories = [
+  "development-tools",
+  "development-tools::procedural-macro-helpers",
+  "encoding",
+  "no-std",
+  "rust-patterns"
+]
+
+[dependencies]
+serde_cursor_impl = { path = "proc_macro", version = "0.3.1" }
+
+serde_core = { version = "1.0.228", default-features = false }
+
+serde_with = { version = "3.18", default-features = false, optional = true }
 
 [dev-dependencies]
 evil = "0.2.2"
 monostate = "1.0"
 serde = { version = "1.0.228", features = ["derive"] }
-serde-query = "0.2.0"
 serde_json = "1.0.149"
+serde-query = "0.2.0"
 serde_with = "3.18"
 toml = "1.0"
 trybuild = "1.0.116"
 
-[workspace]
-resolver = "2"
-members = [".", "proc_macro"]
+[features]
+default = ["std"]
+alloc = ["serde_core/alloc", "serde_with?/alloc"]
+serde_with = ["dep:serde_with"]
+std = ["alloc", "serde_core/std", "serde_with?/std"]
