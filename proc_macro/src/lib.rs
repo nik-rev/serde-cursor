@@ -1,4 +1,5 @@
 //! This crate is an implementation detail of the [`serde_cursor`](https://docs.rs/serde_cursor/latest/serde_cursor) crate.
+#![allow(rustdoc::invalid_rust_codeblocks)]
 
 use proc_macro::Delimiter;
 use proc_macro::Group;
