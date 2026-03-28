@@ -23,6 +23,7 @@ mod path;
 /// Get version from `Cargo.toml`:
 ///
 /// ```
+/// # /*
 /// use serde_cursor::Cursor;
 ///
 /// # fn main() -> Result<(), Box<dyn std::error::Error>> {
@@ -34,6 +35,7 @@ mod path;
 /// let version: String = toml::from_str::<Cursor!(workspace.package.version)>(data)?.0;
 /// assert_eq!(version, "0.1");
 /// # Ok(()) }
+/// # */
 /// ```
 ///
 /// See the [crate-level](https://docs.rs/serde_cursor/latest/serde_cursor) documentation for more info.
@@ -97,6 +99,7 @@ pub fn Cursor(input: TokenStream) -> TokenStream {
 /// It's not uncommon for multiple queries to get quite repetitive:
 ///
 /// ```
+/// # /*
 /// # use serde_json::from_str;
 /// # use serde_cursor::Cursor;
 /// # fn main() -> Result<(), Box<dyn std::error::Error>> {
@@ -106,11 +109,13 @@ pub fn Cursor(input: TokenStream) -> TokenStream {
 /// let humidity: Vec<f64> = toml::from_str::<Cursor!(japan.properties.timeseries[].data.instant.details.relative_humidity)>(japan)?.0;
 /// let temperature: Vec<f64> = toml::from_str::<Cursor!(japan.properties.timeseries[].data.instant.details.air_temperature)>(japan)?.0;
 /// # Ok(()) }
+/// # */
 /// ```
 ///
 /// `serde_cursor` supports **interpolations**. You can factor out the common path into a type `Details`, and then interpolate it with `$Details` in the path.
 ///
 /// ```
+/// # /*
 /// # use serde_json::from_str;
 /// # fn main() -> Result<(), Box<dyn std::error::Error>> {
 /// # let france = "france = { properties = { timeseries = [{ data = { instant = { details = { air_pressure_at_sea_level = 1.0, relative_humidity = 2.0, air_temperature = 3.0 } } } }] } }";
@@ -122,6 +127,7 @@ pub fn Cursor(input: TokenStream) -> TokenStream {
 /// let humidity: Vec<f64> = toml::from_str::<Cursor!(japan.$Details.relative_humidity)>(japan)?.0;
 /// let temperature: Vec<f64> = toml::from_str::<Cursor!(japan.$Details.air_temperature)>(japan)?.0;
 /// # Ok(()) }
+/// # */
 /// ```
 ///
 /// # Under the hood
@@ -129,17 +135,21 @@ pub fn Cursor(input: TokenStream) -> TokenStream {
 /// The type returned `Cursor!` here:
 ///
 /// ```
+/// # /*
 /// # type C =
 /// serde_cursor::Cursor!(package[].dependencies: String)
 /// # ;
+/// # */
 /// ```
 ///
 /// Is equivalent to the `Cursor` **type**, with the 2nd argument being a call of the `Path!` macro:
 ///
 /// ```
+/// # /*
 /// # type C =
 /// serde_cursor::Cursor<String, serde_cursor::Path!(package[].dependencies + serde_cursor::PathEnd)>
 /// # ;
+/// # */
 /// ```
 ///
 /// See the [crate-level](https://docs.rs/serde_cursor/latest/serde_cursor) documentation for more info.
