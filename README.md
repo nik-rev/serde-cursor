@@ -138,6 +138,7 @@ The [`monostate`](https://github.com/dtolnay/monostate) crate provides the `Must
 Together, these 2 crates provide an almost jq-like experience of data processing in Rust:
 
 ```rust
+// early exit if the `reason` field is not equal to `"compiler-message"`
 get!(reason: MustBe!("compiler-message"))?;
 get!(message.message: MustBe!("trace_macro"))?;
 

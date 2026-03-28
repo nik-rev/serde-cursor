@@ -175,6 +175,7 @@
 //!
 //! ```
 //! # /*
+//! // early exit if the `reason` field is not equal to `"compiler-message"`
 //! get!(reason: MustBe!("compiler-message"))?;
 //! get!(message.message: MustBe!("trace_macro"))?;
 //!
