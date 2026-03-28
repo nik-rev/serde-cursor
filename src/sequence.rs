@@ -14,9 +14,9 @@ use core::hash::Hash;
 use std::collections::HashSet;
 
 /// Sequences of items, such as [`Vec<T>`] or [`HashSet<T>`].
-/// The index-all `.*` syntax requires this trait to be implemented.
+/// The index-all `[]` syntax requires this trait to be implemented.
 ///
-/// The purpose of this trait is to enable the index-all `.*.` syntax
+/// The purpose of this trait is to enable the index-all `[]` syntax
 /// when collecting fields of an array:
 ///
 /// ```toml
@@ -27,7 +27,7 @@ use std::collections::HashSet;
 /// rand = "0.9"
 /// ```
 ///
-/// The index-all `.*` accesses every element in an array:
+/// The index-all `[]` accesses every element in an array:
 ///
 /// ```
 /// # mod fs { pub fn read_to_string(_: &str) -> Result<String, Box<dyn std::error::Error>> { Ok(String::from("package = [{ name = 'serde' }, { name = 'rand' }]")) } }
@@ -36,7 +36,7 @@ use std::collections::HashSet;
 /// # fn main() -> Result<(), Box<dyn std::error::Error>> {
 /// let file = fs::read_to_string("Cargo.lock")?;
 ///
-/// let packages: Vec<String> = toml::from_str::<Cursor!(package.*.name)>(&file)?.0;
+/// let packages: Vec<String> = toml::from_str::<Cursor!(package[].name)>(&file)?.0;
 ///
 /// assert_eq!(packages, vec!["serde", "rand"]);
 /// # Ok(()) }

@@ -435,7 +435,7 @@
 //!
 //! # `serde_with` integration
 //!
-//! If `feature = "serde_with"` is enabled, the type returned by `Cursor!` will implement [`serde_with::DeserializeAs`] and [`serde_with::SerializeAs`],
+//! If `feature = "serde_with"` is enabled, the type returned by `Cursor!` will implement [`serde_with::DeserializeAs`](https://docs.rs/serde_with/latest/serde_with/trait.DeserializeAs.html) and [`serde_with::SerializeAs`](https://docs.rs/serde_with/latest/serde_with/trait.SerializeAs.html),
 //! meaning you can use it with the `#[serde_as]` attribute:
 //!
 //! ```
@@ -648,7 +648,7 @@ mod cursor {
 }
 
 /// Available if you need to implement a trait for the type returned by `Cursor!`,
-/// or implement the `Sequence` trait to have the index-all `.*` syntax work with
+/// or implement the `Sequence` trait to have the index-all `[]` syntax work with
 /// more collections.
 ///
 /// This module only shows up in the generated documentation to group items that are

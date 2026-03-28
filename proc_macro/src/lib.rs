@@ -102,9 +102,9 @@ pub fn Cursor(input: TokenStream) -> TokenStream {
 /// # fn main() -> Result<(), Box<dyn std::error::Error>> {
 /// # let france = "france = { properties = { timeseries = [{ data = { instant = { details = { air_pressure_at_sea_level = 1.0, relative_humidity = 2.0, air_temperature = 3.0 } } } }] } }";
 /// # let japan = "japan = { properties = { timeseries = [{ data = { instant = { details = { air_pressure_at_sea_level = 4.0, relative_humidity = 5.0, air_temperature = 6.0 } } } }] } }";
-/// let pressure: Vec<f64> = toml::from_str::<Cursor!(france.properties.timeseries.*.data.instant.details.air_pressure_at_sea_level)>(france)?.0;
-/// let humidity: Vec<f64> = toml::from_str::<Cursor!(japan.properties.timeseries.*.data.instant.details.relative_humidity)>(japan)?.0;
-/// let temperature: Vec<f64> = toml::from_str::<Cursor!(japan.properties.timeseries.*.data.instant.details.air_temperature)>(japan)?.0;
+/// let pressure: Vec<f64> = toml::from_str::<Cursor!(france.properties.timeseries[].data.instant.details.air_pressure_at_sea_level)>(france)?.0;
+/// let humidity: Vec<f64> = toml::from_str::<Cursor!(japan.properties.timeseries[].data.instant.details.relative_humidity)>(japan)?.0;
+/// let temperature: Vec<f64> = toml::from_str::<Cursor!(japan.properties.timeseries[].data.instant.details.air_temperature)>(japan)?.0;
 /// # Ok(()) }
 /// ```
 ///
@@ -116,7 +116,7 @@ pub fn Cursor(input: TokenStream) -> TokenStream {
 /// # let france = "france = { properties = { timeseries = [{ data = { instant = { details = { air_pressure_at_sea_level = 1.0, relative_humidity = 2.0, air_temperature = 3.0 } } } }] } }";
 /// # let japan = "japan = { properties = { timeseries = [{ data = { instant = { details = { air_pressure_at_sea_level = 4.0, relative_humidity = 5.0, air_temperature = 6.0 } } } }] } }";
 /// # use serde_cursor::Cursor;
-/// type Details<RestOfPath> = serde_cursor::Path!(properties.timeseries.*.data.instant.details + RestOfPath);
+/// type Details<RestOfPath> = serde_cursor::Path!(properties.timeseries[].data.instant.details + RestOfPath);
 ///
 /// let pressure: Vec<f64> = toml::from_str::<Cursor!(france.$Details.air_pressure_at_sea_level)>(france)?.0;
 /// let humidity: Vec<f64> = toml::from_str::<Cursor!(japan.$Details.relative_humidity)>(japan)?.0;
@@ -130,7 +130,7 @@ pub fn Cursor(input: TokenStream) -> TokenStream {
 ///
 /// ```
 /// # type C =
-/// serde_cursor::Cursor!(package.*.dependencies: String)
+/// serde_cursor::Cursor!(package[].dependencies: String)
 /// # ;
 /// ```
 ///
@@ -138,7 +138,7 @@ pub fn Cursor(input: TokenStream) -> TokenStream {
 ///
 /// ```
 /// # type C =
-/// serde_cursor::Cursor<String, serde_cursor::Path!(package.*.dependencies + serde_cursor::PathEnd)>
+/// serde_cursor::Cursor<String, serde_cursor::Path!(package[].dependencies + serde_cursor::PathEnd)>
 /// # ;
 /// ```
 ///
@@ -333,7 +333,7 @@ fn parse_path_segments(
 ///
 /// Can parse the following syntax (all inside the brackets):
 ///
-/// ```
+/// ```txt
 /// Cursor!(message[1..7].children)
 /// Cursor!(message[1..=7].children)
 /// Cursor!(message[..=7].children)
@@ -442,7 +442,7 @@ enum IndexPathSegment {
     /// Index into a sequence.
     ///
     /// ```txt
-    /// Cursor!(packages.*.dependencies[0])
+    /// Cursor!(packages[].dependencies[0])
     ///                                 ^
     /// ```
     Index(TokenStream),
@@ -454,7 +454,7 @@ enum PathSegment {
     /// The index-all, `*`.
     ///
     /// ```txt
-    /// Cursor!(packages.*.name)
+    /// Cursor!(packages[].name)
     ///                  ^
     /// ```
     ///
